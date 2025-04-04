@@ -1,8 +1,74 @@
+'use client';
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Leaf, ShieldCheck, BarChart3, Truck } from "lucide-react"
+import { ArrowRight, Leaf, ShieldCheck, BarChart3, Truck, CheckCircle2, Eye } from "lucide-react"
+import { Loader } from "./components/ui/loader"
+import { useState } from "react"
+
+const features = [
+  {
+    icon: Leaf,
+    title: "Farm to Table Tracking",
+    description: "Track food from production to consumption with immutable blockchain records"
+  },
+  {
+    icon: ShieldCheck,
+    title: "Blockchain Verified",
+    description: "Every transaction is secured and verified on the blockchain for maximum trust"
+  },
+  {
+    icon: BarChart3,
+    title: "Government Integration",
+    description: "Direct subsidies and monitoring for food security and regulatory compliance"
+  },
+  {
+    icon: Truck,
+    title: "Logistics Optimization",
+    description: "Streamline transportation and reduce waste with real-time tracking"
+  },
+  {
+    icon: CheckCircle2,
+    title: "Quality Assurance",
+    description: "Verify quality standards and certifications at every step of the supply chain"
+  },
+  {
+    icon: Eye,
+    title: "Consumer Transparency",
+    description: "Empower consumers with complete visibility into their food's journey and origin"
+  }
+]
+
+const processSteps = [
+  {
+    step: 1,
+    title: "Farmer Registration",
+    description: "Farmers register their crops with detailed information about planting, cultivation methods, and harvesting"
+  },
+  {
+    step: 2,
+    title: "Supplier Distribution",
+    description: "Suppliers purchase from farmers and distribute to retailers with blockchain verification at each step"
+  },
+  {
+    step: 3,
+    title: "Retail Sales",
+    description: "Retailers receive products with complete history and make them available to consumers"
+  },
+  {
+    step: 4,
+    title: "Consumer Access",
+    description: "Consumers scan QR codes to view the complete journey of their food from farm to table"
+  },
+  {
+    step: 5,
+    title: "Government Oversight",
+    description: "Government agencies monitor the supply chain and distribute subsidies directly through the platform"
+  }
+]
 
 export default function WelcomePage() {
+  const [isLoading, setIsLoading] = useState(false)
+
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-accent/20 to-background">
       <header className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-10">
@@ -85,71 +151,15 @@ export default function WelcomePage() {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="feature-card animate-fade-in" style={{ animationDelay: "0.1s" }}>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Leaf className="h-5 w-5 text-primary" />
+              {features.map((feature, index) => (
+                <div key={feature.title} className="feature-card animate-fade-in" style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <feature.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold">{feature.title}</h3>
+                  <p className="text-muted-foreground mt-2">{feature.description}</p>
                 </div>
-                <h3 className="text-xl font-bold">Farm to Table Tracking</h3>
-                <p className="text-muted-foreground mt-2">
-                  Track food from production to consumption with immutable blockchain records
-                </p>
-              </div>
-              <div className="feature-card animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <ShieldCheck className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold">Blockchain Verified</h3>
-                <p className="text-muted-foreground mt-2">
-                  Every transaction is secured and verified on the blockchain for maximum trust
-                </p>
-              </div>
-              <div className="feature-card animate-fade-in" style={{ animationDelay: "0.3s" }}>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold">Government Integration</h3>
-                <p className="text-muted-foreground mt-2">
-                  Direct subsidies and monitoring for food security and regulatory compliance
-                </p>
-              </div>
-              <div className="feature-card animate-fade-in" style={{ animationDelay: "0.4s" }}>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Truck className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold">Logistics Optimization</h3>
-                <p className="text-muted-foreground mt-2">
-                  Streamline transportation and reduce waste with real-time tracking
-                </p>
-              </div>
-              <div className="feature-card animate-fade-in" style={{ animationDelay: "0.5s" }}>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <svg className="h-5 w-5 text-primary" fill="none" height="24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold">Quality Assurance</h3>
-                <p className="text-muted-foreground mt-2">
-                  Verify quality standards and certifications at every step of the supply chain
-                </p>
-              </div>
-              <div className="feature-card animate-fade-in" style={{ animationDelay: "0.6s" }}>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <svg className="h-5 w-5 text-primary" fill="none" height="24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-                    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-                    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-                    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-                    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                    <path d="M9 9h.01" />
-                    <path d="M15 9h.01" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold">Consumer Transparency</h3>
-                <p className="text-muted-foreground mt-2">
-                  Empower consumers with complete visibility into their food's journey and origin
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
@@ -171,51 +181,17 @@ export default function WelcomePage() {
             <div className="relative">
               <div className="absolute left-1/2 -ml-0.5 w-0.5 h-full bg-border"></div>
               <div className="grid grid-cols-1 gap-8 relative">
-                <div className="flex items-center gap-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg z-10">1</div>
-                  <div className="feature-card flex-1">
-                    <h3 className="text-xl font-bold">Farmer Registration</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Farmers register their crops with detailed information about planting, cultivation methods, and harvesting
-                    </p>
+                {processSteps.map((step, index) => (
+                  <div key={step.step} className="flex items-center gap-8 animate-fade-in" style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
+                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg z-10">
+                      {step.step}
+                    </div>
+                    <div className="feature-card flex-1">
+                      <h3 className="text-xl font-bold">{step.title}</h3>
+                      <p className="text-muted-foreground mt-2">{step.description}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg z-10">2</div>
-                  <div className="feature-card flex-1">
-                    <h3 className="text-xl font-bold">Supplier Distribution</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Suppliers purchase from farmers and distribute to retailers with blockchain verification at each step
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg z-10">3</div>
-                  <div className="feature-card flex-1">
-                    <h3 className="text-xl font-bold">Retail Sales</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Retailers receive products with complete history and make them available to consumers
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-8 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg z-10">4</div>
-                  <div className="feature-card flex-1">
-                    <h3 className="text-xl font-bold">Consumer Access</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Consumers scan QR codes to view the complete journey of their food from farm to table
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-8 animate-fade-in" style={{ animationDelay: "0.5s" }}>
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg z-10">5</div>
-                  <div className="feature-card flex-1">
-                    <h3 className="text-xl font-bold">Government Oversight</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Government agencies monitor the supply chain and distribute subsidies directly through the platform
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -335,6 +311,15 @@ export default function WelcomePage() {
           </div>
         </div>
       </footer>
+
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-2">
+            <Loader className="h-8 w-8" />
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
