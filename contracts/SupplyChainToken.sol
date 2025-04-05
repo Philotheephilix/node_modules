@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract SupplyChainToken is ERC20, Ownable {
-    // Metadata about the produce
+    // Produce metadata
     string public produceName;
     string public produceType;
     string public origin;
@@ -14,18 +14,19 @@ contract SupplyChainToken is ERC20, Ownable {
     bool public isOrganic;
     uint256 public sustainabilityScore;
 
-    // Quality verification data
+    // Quality verification structure
     struct QualityCheck {
         address inspector;
         uint256 timestamp;
         string report;
-        uint8 score; // 0-100
+        uint8 score; // 0 - 100
         bool passed;
     }
-    QualityCheck[] public qualityChecks;
 
-    // Supply chain tracking
-    struct Transfer {
+    QualityCheck[] private qualityChecks;
+
+    // Supply chain tracking structure
+    struct TransferRecord {
         address from;
         address to;
         uint256 amount;
@@ -33,7 +34,8 @@ contract SupplyChainToken is ERC20, Ownable {
         string location;
         string condition;
     }
-    Transfer[] public transfers;
+
+    TransferRecord[] private transfers;
 
     constructor(
         string memory _name,
@@ -55,23 +57,22 @@ contract SupplyChainToken is ERC20, Ownable {
         isOrganic = _isOrganic;
         sustainabilityScore = _sustainabilityScore;
 
-        // Mint initial supply to farmer
         _mint(_farmer, _initialSupply);
     }
 
-    // Transfer with supply chain tracking
+    // Transfer tokens with supply chain metadata
     function transferWithTracking(
         address to,
         uint256 amount,
         string memory location,
         string memory condition
     ) public returns (bool) {
-        require(amount > 0, "Amount must be greater than 0");
+        require(amount > 0, "Transfer amount must be greater than 0");
         require(to != address(0), "Cannot transfer to zero address");
 
-        // Record the transfer
+        // Record transfer metadata
         transfers.push(
-            Transfer({
+            TransferRecord({
                 from: msg.sender,
                 to: to,
                 amount: amount,
@@ -81,18 +82,17 @@ contract SupplyChainToken is ERC20, Ownable {
             })
         );
 
-        // Perform the transfer
         return transfer(to, amount);
     }
 
-    // Quality check recording
+    // Add quality check entry
     function addQualityCheck(
         string memory report,
         uint8 score,
         bool passed
     ) public {
         require(score <= 100, "Score must be between 0 and 100");
-        
+
         qualityChecks.push(
             QualityCheck({
                 inspector: msg.sender,
@@ -104,15 +104,17 @@ contract SupplyChainToken is ERC20, Ownable {
         );
     }
 
-    // Burn tokens when produce is sold to consumer or disposed
+    // Burn tokens (simulate produce being sold or discarded)
     function burnFromRetailer(uint256 amount) public {
         require(amount > 0, "Amount must be greater than 0");
-        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
+        require(balanceOf(msg.sender) >= amount, "Insufficient balance to burn");
+
         _burn(msg.sender, amount);
     }
 
     // View functions
-    function getTransferHistory() public view returns (Transfer[] memory) {
+
+    function getTransferHistory() public view returns (TransferRecord[] memory) {
         return transfers;
     }
 
@@ -139,4 +141,4 @@ contract SupplyChainToken is ERC20, Ownable {
             sustainabilityScore
         );
     }
-} 
+}
