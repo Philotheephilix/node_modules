@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { ethers } from "ethers"
 import { DashboardLayout } from "../../../components/dashboard-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Button } from "../../../components/ui/button"
 import { Progress } from "../../../components/ui/progress"
 import {
   BarChart,
@@ -161,7 +160,7 @@ export default function DashboardPage() {
 
               // Process logs if we have any
               if (logs && logs.length > 0) {
-                transfers = await Promise.all(logs.map(async (log) => {
+                transfers = await Promise.all(logs.map(async (log: { blockNumber: ethers.BlockTag; data: ethers.BytesLike; topics: readonly string[] | undefined; transactionHash: any }) => {
                   const block = await provider.getBlock(log.blockNumber)
                   // Decode the log data
                   const decodedLog = tokenContract.interface.decodeEventLog(
