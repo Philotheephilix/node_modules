@@ -63,11 +63,11 @@ export default function CropsPage() {
             signer
           )
 
-          // Load tokens
-          const allTokens = await factory.getAllTokens()
+          const tokenAddresses = await factory.getAllTokens()
           const tokens: CropToken[] = []
 
-          for (const tokenAddress of allTokens) {
+          for (const tokenAddress of tokenAddresses) {
+            // Create token contract instance
             const tokenContract = new ethers.Contract(
               tokenAddress,
               SupplyTokenABI.output.abi,
@@ -75,33 +75,69 @@ export default function CropsPage() {
             )
 
             // Get token details
-            const name = await tokenContract.name()
-            const symbol = await tokenContract.symbol()
-            const supply = ethers.formatUnits(await tokenContract.totalSupply(), 18)
-            const owner = await tokenContract.owner()
-            const balance = ethers.formatUnits(await tokenContract.balanceOf(address), 18)
+            const [name, symbol, totalSupply, owner] = await Promise.all([
+              tokenContract.name(),
+              tokenContract.symbol(),
+              tokenContract.totalSupply(),
+              tokenContract.owner()
+            ])
 
-            // Get transfer events for transaction history
-            const transferFilter = tokenContract.filters.Transfer()
-            const events = await tokenContract.queryFilter(transferFilter)
+            // Get token balance for current user
+            const balance = await tokenContract.balanceOf(address)
+
+            // Fetch transfer events using Alchemy
+            const url = "https://rootstock-testnet.g.alchemy.com/v2/oJTjnNCsJEOqYv3MMtrtT6LUFhwcW9pR"
+            const transferTopic = ethers.id("Transfer(address,address,uint256)")
             
-            const transactions: TokenTransaction[] = events.map(event => ({
-              from: (event as ethers.EventLog).args?.[0],
-              to: (event as ethers.EventLog).args?.[1],
-              amount: ethers.formatUnits((event as ethers.EventLog).args?.[2], 18),
-              timestamp: event.blockNumber,
-              transactionHash: event.transactionHash
-            }))
+            const body = JSON.stringify({
+              id: 1,
+              jsonrpc: "2.0",
+              method: "eth_getLogs",
+              params: [{
+                address: tokenAddress,
+                fromBlock: "0x0",
+                toBlock: "latest", 
+                topics: [transferTopic]
+              }]
+            })
+            
+            const response = await fetch(url, {
+              method: "POST",
+              headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+              },
+              body
+            })
+            
+            const data = await response.json()
+            const transferEvents = data.result || []
+
+            // Process transfer events
+            const transactions: TokenTransaction[] = transferEvents.map((event: any) => {
+              const [from, to] = event.topics.slice(1).map((topic: string) => 
+                ethers.getAddress("0x" + topic.slice(26))
+              )
+              const amount = ethers.formatUnits(event.data, 0)
+              
+              return {
+                from,
+                to, 
+                amount,
+                timestamp: 0, // We'll fetch timestamps separately if needed
+                transactionHash: event.transactionHash
+              }
+            })
 
             tokens.push({
               id: tokenAddress,
               name,
               symbol,
               tokenAddress,
-              supply,
+              supply: totalSupply.toString(),
               owner,
               transactions,
-              balance
+              balance: balance.toString()
             })
           }
           
@@ -164,37 +200,47 @@ export default function CropsPage() {
                       {crop.transactions.length > 0 ? (
                         crop.transactions.map((tx, index) => (
                           <div key={`${crop.id}-${index}`} 
-                               className="flex items-center justify-between p-3 rounded-lg border bg-card">
-                            <div className="flex flex-col">
+                               className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                            <div className="flex flex-col space-y-2">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">From:</span>
-                                <span className="text-sm font-mono">
+                                <Badge variant="secondary" className="text-xs">
+                                  From
+                                </Badge>
+                                <span className="text-sm font-mono bg-muted px-2 py-1 rounded">
                                   {tx.from.substring(0, 6)}...{tx.from.substring(tx.from.length - 4)}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">To:</span>
-                                <span className="text-sm font-mono">
+                                <Badge variant="secondary" className="text-xs">
+                                  To
+                                </Badge>
+                                <span className="text-sm font-mono bg-muted px-2 py-1 rounded">
                                   {tx.to.substring(0, 6)}...{tx.to.substring(tx.to.length - 4)}
                                 </span>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end">
-                              <span className="font-medium">{tx.amount} tokens</span>
+                            <div className="flex flex-col items-end space-y-2">
+                              <Badge variant="outline" className="text-lg">
+                                {tx.amount} {crop.symbol}
+                              </Badge>
                               <a 
                                 href={`https://sepolia.etherscan.io/tx/${tx.transactionHash}`} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="text-sm text-blue-500 hover:text-blue-600"
+                                className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
                               >
-                                View on Etherscan
+                                <span>View on Etherscan</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                               </a>
                             </div>
                           </div>
                         ))
                       ) : (
-                        <div className="text-center text-muted-foreground py-4">
-                          No transactions found for this token
+                        <div className="text-center text-muted-foreground py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-history"><path d="M12 8v4l3 3"></path><path d="M3.05 11a9 9 0 1 1 .5 4"></path><path d="M2 2v5h5"></path></svg>
+                            <p>No transactions found for this token</p>
+                          </div>
                         </div>
                       )}
                     </div>
