@@ -1,13 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ethers } from "ethers"
-
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
 import { DashboardLayout } from "../../../components/dashboard-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
@@ -19,11 +12,19 @@ import {
   Leaf,
   Package,
 } from "lucide-react"
-import TokenFactoryABI from "../../../contracts/TokenFactory.json"
-import SupplyTokenABI from "../../../contracts/SupplyToken.json"
 import React from "react"
 
-const TOKEN_FACTORY_ADDRESS = "0xf88C501cBA1DB713c080F886c74DB87ffd616FB2"
+// Alchemy API configuration
+const ALCHEMY_API_KEY = "oJTjnNCsJEOqYv3MMtrtT6LUFhwcW9pR";
+const ALCHEMY_URL = `https://rootstock-testnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+const TOKEN_FACTORY_ADDRESS = "0xf88C501cBA1DB713c080F886c74DB87ffd616FB2";
+
+// Declare global window.ethereum for TypeScript
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
 
 interface TokenTransaction {
   title: string;
@@ -44,8 +45,16 @@ interface DashboardData {
   }[];
 }
 
+interface TransferLog {
+  blockNumber: string;
+  transactionHash: string;
+  topics: string[];
+  data: string;
+}
+
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
+  const [walletAddress, setWalletAddress] = useState<string>("")
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     totalTokens: 0,
     totalSupply: "0",
@@ -54,82 +63,292 @@ export default function DashboardPage() {
     tokens: []
   })
 
+  // Get wallet address from Ethereum provider
   useEffect(() => {
-    const loadBlockchainData = async () => {
+    const getWalletAddress = async () => {
       if (typeof window !== 'undefined' && window.ethereum) {
         try {
-          const provider = new ethers.BrowserProvider(window.ethereum)
-          await provider.send("eth_requestAccounts", [])
-          const signer = await provider.getSigner()
+          // Request account access
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
           
-          const factory = new ethers.Contract(
-            TOKEN_FACTORY_ADDRESS,
-            TokenFactoryABI.output.abi,
-            signer
-          )
-
-          // Get all tokens
-          const allTokens = await factory.getAllTokens()
-          let totalSupplyValue = ethers.parseUnits("0", 18)
-          const transactions: TokenTransaction[] = []
-          const tokenDetails: Array<{ name: string; address: string; created: Date }> = []
-
-          // Process each token
-          for (const tokenAddress of allTokens) {
-            const tokenContract = new ethers.Contract(
-              tokenAddress,
-              SupplyTokenABI.output.abi,
-              signer
-            )
-
-            const name = await tokenContract.name()
-            const supply = await tokenContract.totalSupply()
-            totalSupplyValue = totalSupplyValue + supply
-
-            // Get recent transfers
-            const transferFilter = tokenContract.filters.Transfer()
-            const events = await tokenContract.queryFilter(transferFilter)
-            
-            // Add token details
-            tokenDetails.push({
-              name: name,
-              address: tokenAddress,
-              created: new Date() // You might want to get this from the contract creation event
-            } as const)
-
-            // Process transfer events
-            for (const event of events.slice(-5)) {
-              const args = (event as ethers.EventLog).args
-              transactions.push({
-                title: `Transfer of ${name}`,
-                transactionId: event.transactionHash,
-                amount: ethers.formatUnits(args?.[2], 18),
-                timestamp: event.blockNumber
-              })
-            }
+          // Get the connected account
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          
+          if (accounts.length > 0) {
+            setWalletAddress(accounts[0]);
           }
-
-          // Sort transactions by timestamp (most recent first)
-          transactions.sort((a, b) => b.timestamp - a.timestamp)
-
-          setDashboardData({
-            totalTokens: allTokens.length,
-            totalSupply: ethers.formatUnits(totalSupplyValue, 18),
-            activeTransactions: transactions.length,
-            recentTransactions: transactions.slice(0, 5),
-            tokens: tokenDetails
-          })
-
         } catch (error) {
-          console.error("Error loading blockchain data:", error)
-        } finally {
-          setLoading(false)
+          console.error("Error getting wallet address:", error);
         }
       }
-    }
+    };
 
-    loadBlockchainData()
-  }, [])
+    getWalletAddress();
+  }, []);
+
+  useEffect(() => {
+    const loadBlockchainData = async () => {
+      if (!walletAddress) {
+        console.log("No wallet address available");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Get all tokens from the factory contract
+        const allTokens = await getAllTokens();
+        
+        let totalSupplyValue = 0;
+        const transactions: TokenTransaction[] = [];
+        const tokenDetails: Array<{ name: string; address: string; created: Date }> = [];
+
+        // Process each token
+        for (const tokenAddress of allTokens) {
+          // Get token details
+          const tokenData = await getTokenDetails(tokenAddress);
+          const name = tokenData.name;
+          const supply = tokenData.totalSupply;
+          totalSupplyValue += parseFloat(supply);
+
+          // Get recent transfers
+          const transferEvents = await getTransferEvents(tokenAddress);
+          
+          // Add token details
+          tokenDetails.push({
+            name: name,
+            address: tokenAddress,
+            created: new Date() // You might want to get this from the contract creation event
+          });
+
+          // Process transfer events
+          for (const event of transferEvents.slice(-5)) {
+            transactions.push({
+              title: `Transfer of ${name}`,
+              transactionId: event.transactionHash,
+              amount: formatTokenAmount(event.data, tokenData.decimals),
+              timestamp: parseInt(event.blockNumber, 16)
+            });
+          }
+        }
+
+        // Sort transactions by timestamp (most recent first)
+        transactions.sort((a, b) => b.timestamp - a.timestamp);
+
+        setDashboardData({
+          totalTokens: allTokens.length,
+          totalSupply: totalSupplyValue.toLocaleString(),
+          activeTransactions: transactions.length,
+          recentTransactions: transactions.slice(0, 5),
+          tokens: tokenDetails
+        });
+
+      } catch (error) {
+        console.error("Error loading blockchain data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (walletAddress) {
+      loadBlockchainData();
+    }
+  }, [walletAddress]);
+
+  // Helper function to get all tokens from the factory contract
+  const getAllTokens = async (): Promise<string[]> => {
+    try {
+      // Get token creation events from the factory contract
+      const tokenCreatedEventSignature = "0x0d0b9391970d9a25552f37d436d2a08ed5c814a430a4b1081d201eacf399688b";
+      
+      const requestBody = {
+        id: 1,
+        jsonrpc: "2.0",
+        method: "eth_getLogs",
+        params: [{
+          address: TOKEN_FACTORY_ADDRESS,
+          fromBlock: "0x0", // Start from genesis
+          toBlock: "latest",
+          topics: [tokenCreatedEventSignature]
+        }]
+      };
+      
+      const response = await fetch(ALCHEMY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || "Failed to fetch token creation events");
+      }
+
+      // Extract token addresses from the event logs
+      // The token address is typically in the second topic of the event
+      const tokenAddresses = data.result.map((log: any) => {
+        // The token address is in the second topic (index 1)
+        // Remove the '0x' prefix and take the last 40 characters (20 bytes = 40 hex chars)
+        const topic = log.topics[1];
+        return "0x" + topic.slice(-40);
+      });
+
+      return tokenAddresses;
+    } catch (error) {
+      console.error("Error getting all tokens:", error);
+      return [];
+    }
+  };
+
+  // Helper function to get token details
+  const getTokenDetails = async (tokenAddress: string): Promise<{ name: string; totalSupply: string; decimals: number }> => {
+    try {
+      // Get token name
+      const nameResponse = await fetch(ALCHEMY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          method: "eth_call",
+          params: [{
+            to: tokenAddress,
+            data: "0x06fdde03" // name() function selector
+          }, "latest"]
+        }),
+      });
+
+      const nameData = await nameResponse.json();
+      
+      // Get token decimals
+      const decimalsResponse = await fetch(ALCHEMY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 2,
+          jsonrpc: "2.0",
+          method: "eth_call",
+          params: [{
+            to: tokenAddress,
+            data: "0x313ce567" // decimals() function selector
+          }, "latest"]
+        }),
+      });
+
+      const decimalsData = await decimalsResponse.json();
+      const decimals = parseInt(decimalsData.result, 16);
+      
+      // Get total supply
+      const supplyResponse = await fetch(ALCHEMY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 3,
+          jsonrpc: "2.0",
+          method: "eth_call",
+          params: [{
+            to: tokenAddress,
+            data: "0x18160ddd" // totalSupply() function selector
+          }, "latest"]
+        }),
+      });
+
+      const supplyData = await supplyResponse.json();
+      
+      if (nameData.error || decimalsData.error || supplyData.error) {
+        throw new Error(nameData.error?.message || decimalsData.error?.message || supplyData.error?.message);
+      }
+
+      return {
+        name: decodeString(nameData.result),
+        totalSupply: formatTokenAmount(supplyData.result, decimals),
+        decimals
+      };
+    } catch (error) {
+      console.error("Error getting token details:", error);
+      return { name: "Unknown Token", totalSupply: "0", decimals: 18 };
+    }
+  };
+
+  // Helper function to get transfer events
+  const getTransferEvents = async (tokenAddress: string): Promise<TransferLog[]> => {
+    try {
+      const transferEventSignature = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+      
+      const requestBody = {
+        id: 1,
+        jsonrpc: "2.0",
+        method: "eth_getLogs",
+        params: [{
+          address: tokenAddress,
+          fromBlock: "0x0", // Start from genesis
+          toBlock: "latest",
+          topics: [transferEventSignature]
+        }]
+      };
+      
+      const response = await fetch(ALCHEMY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || "Failed to fetch transfer events");
+      }
+
+      return data.result || [];
+    } catch (error) {
+      console.error("Error getting transfer events:", error);
+      return [];
+    }
+  };
+
+  // Helper function to decode string from hex
+  const decodeString = (hex: string): string => {
+    if (!hex || hex === '0x') return '';
+    
+    // Remove '0x' prefix if present
+    hex = hex.startsWith('0x') ? hex.slice(2) : hex;
+    
+    // Convert hex to bytes
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < hex.length; i += 2) {
+      bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+    }
+    
+    // Convert bytes to string
+    return new TextDecoder().decode(bytes).replace(/\0/g, '');
+  };
+
+  // Helper function to format token amount
+  const formatTokenAmount = (hexAmount: string, decimals: number): string => {
+    if (!hexAmount || hexAmount === '0x') return '0';
+    
+    // Remove '0x' prefix if present
+    hexAmount = hexAmount.startsWith('0x') ? hexAmount.slice(2) : hexAmount;
+    
+    // Convert hex to decimal
+    const decimal = parseInt(hexAmount, 16);
+    
+    // Format with the correct number of decimals
+    return (decimal / Math.pow(10, decimals)).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
 
   const roleCards = {
     producer: [
@@ -162,6 +381,34 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Welcome to your StockR00t dashboard</p>
         </div>
+
+        {!walletAddress && (
+          <Card className="bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle>Connect Wallet</CardTitle>
+              <CardDescription>Please connect your wallet to view blockchain data</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={async () => {
+                  if (typeof window !== 'undefined' && window.ethereum) {
+                    try {
+                      await window.ethereum.request({ method: 'eth_requestAccounts' });
+                      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                      if (accounts.length > 0) {
+                        setWalletAddress(accounts[0]);
+                      }
+                    } catch (error) {
+                      console.error("Error connecting wallet:", error);
+                    }
+                  }
+                }}
+              >
+                Connect Wallet
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {loading ? (
           <div className="flex justify-center py-8">
