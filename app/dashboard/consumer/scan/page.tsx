@@ -131,6 +131,13 @@ interface SupplyChainStage {
   txHash: string;
 }
 
+interface TransferLog {
+  blockNumber: string;
+  transactionHash: string;
+  topics: string[];
+  data: string;
+}
+
 export default function ScanPage() {
   const [tokenAddress, setTokenAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -221,9 +228,31 @@ export default function ScanPage() {
   // Function to handle QR scan result
   const handleScanResult = (result: any) => {
     if (result) {
-      setTokenAddress(result.text);
-      setShowScanner(false);
-      handleScan();
+      try {
+        // Extract the token address from the QR code
+        const scannedText = result.text;
+        
+        // Validate if it's a valid Ethereum address
+        if (!ethers.isAddress(scannedText)) {
+          toast({
+            title: "Invalid Address",
+            description: "Please scan a valid token address QR code",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        setTokenAddress(scannedText);
+        setShowScanner(false);
+        handleScan();
+      } catch (error) {
+        console.error("Error processing QR code:", error);
+        toast({
+          title: "Scan Error",
+          description: "Failed to process QR code. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -244,28 +273,14 @@ export default function ScanPage() {
     setError('');
 
     try {
-      // Create a provider and contract instance
-      const provider = new ethers.JsonRpcProvider(ROOTSTOCK_RPC);
-      const tokenContract = new ethers.Contract(
-        tokenAddress,
-        [
-          "function name() view returns (string)",
-          "function symbol() view returns (string)",
-          "function decimals() view returns (uint8)",
-          "function totalSupply() view returns (uint256)",
-          "function balanceOf(address) view returns (uint256)"
-        ],
-        provider
-      );
+      // Alchemy API configuration
+      const ALCHEMY_API_KEY = "oJTjnNCsJEOqYv3MMtrtT6LUFhwcW9pR";
+      const ALCHEMY_URL = `https://rootstock-testnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
       
-      // Get token details
-      const [name, symbol, decimals, totalSupply] = await Promise.all([
-        tokenContract.name(),
-        tokenContract.symbol(),
-        tokenContract.decimals(),
-        tokenContract.totalSupply()
-      ]);
-
+      // Get token details using Alchemy API
+      const tokenDetails = await getTokenDetails(tokenAddress, ALCHEMY_URL);
+      const { name, symbol, decimals, totalSupply } = tokenDetails;
+      
       // Get user address from browser wallet if available
       let userAddress = "0x0000000000000000000000000000000000000000";
       if (typeof window !== 'undefined' && window.ethereum) {
@@ -276,255 +291,267 @@ export default function ScanPage() {
           userAddress = await signer.getAddress();
         } catch (error) {
           console.warn("Failed to get user address from wallet:", error);
-          // Continue with the fallback address
         }
       }
-
-      // Get the current block number
-      const currentBlock = await provider.getBlockNumber();
       
-      let transferEvents: any[] = [];
-      let useMockData = false;
+      // Get transfer events using Alchemy
+      const transferEvents = await getTransferEvents(tokenAddress, ALCHEMY_URL);
       
-      try {
-        // Use Alchemy API to get transfer events
-        const ALCHEMY_API_KEY = "oJTjnNCsJEOqYv3MMtrtT6LUFhwcW9pR";
-        const ALCHEMY_URL = `https://rootstock-testnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
-        const transferEventSignature = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-        
-        try {
-          // Create the request body for Alchemy API
-          const requestBody = {
-            id: 1,
-            jsonrpc: "2.0",
-            method: "eth_getLogs",
-            params: [{
-              address: tokenAddress,
-              fromBlock: "0x0", // Start from genesis
-              toBlock: "latest",
-              topics: [transferEventSignature]
-            }]
-          };
-          
-          // Make the API request
-          const response = await fetch(ALCHEMY_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody)
-          });
-          
-          const data = await response.json();
-          
-          if (data.error) {
-            console.error("Alchemy API error:", data.error);
-            useMockData = true;
-          } else {
-            transferEvents = data.result || [];
-            console.log("Transfer events from Alchemy:", transferEvents);
-          }
-        } catch (error: any) {
-          console.error("Error fetching transfer events from Alchemy:", error);
-          useMockData = true;
-        }
-        
-        // If we still have no events or encountered errors, use mock data
-        if (transferEvents.length === 0 || useMockData) {
-          console.log("Using mock transaction data due to API limitations");
-          
-          // Create mock transaction data
-          const mockTransactions: Transaction[] = [
-            {
-              hash: "0x" + "0".repeat(64),
-              from: ethers.ZeroAddress,
-              to: userAddress,
-              value: ethers.parseUnits("1000", decimals).toString(),
-              timestamp: Date.now() - 30 * 24 * 60 * 60 * 1000, // 30 days ago
-              blockNumber: currentBlock - 100
-            },
-            {
-              hash: "0x" + "1".repeat(64),
-              from: userAddress,
-              to: "0x" + "2".repeat(40),
-              value: ethers.parseUnits("500", decimals).toString(),
-              timestamp: Date.now() - 15 * 24 * 60 * 60 * 1000, // 15 days ago
-              blockNumber: currentBlock - 50
-            },
-            {
-              hash: "0x" + "2".repeat(64),
-              from: "0x" + "2".repeat(40),
-              to: "0x" + "3".repeat(40),
-              value: ethers.parseUnits("200", decimals).toString(),
-              timestamp: Date.now() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
-              blockNumber: currentBlock - 25
-            }
-          ];
-          
-          // Create supply chain from mock transactions
-          const mockSupplyChain: SupplyChainStage[] = mockTransactions.map((tx: Transaction, index: number) => {
-            let stage = "Unknown";
-            if (tx.from === ethers.ZeroAddress) {
-              stage = "Production";
-            } else if (index === mockTransactions.length - 1) {
-              stage = "Retail";
-            } else {
-              stage = "Distribution";
-            }
-
+      // Process transfer events to get transaction details
+      const transactions = await Promise.all(
+        transferEvents.map(async (log: TransferLog): Promise<Transaction | null> => {
+          try {
+            // Get block for timestamp using Alchemy API
+            const block = await getBlockDetails(log.blockNumber, ALCHEMY_URL);
+            
+            // Parse the log data
+            const from = "0x" + log.topics[1].slice(26);
+            const to = "0x" + log.topics[2].slice(26);
+            const value = log.data;
+            
             return {
-              stage,
-              address: tx.from === ethers.ZeroAddress ? tx.to : tx.from,
-              name: stage === "Production" ? "Manufacturer" : 
-                    stage === "Distribution" ? "Distributor" : 
-                    stage === "Retail" ? "Retailer" : "Unknown",
-              timestamp: tx.timestamp,
-              location: "Blockchain verified",
-              notes: `Transfer: ${ethers.formatUnits(tx.value, decimals)} tokens`,
-              txHash: tx.hash
+              hash: log.transactionHash,
+              from,
+              to,
+              value,
+              timestamp: block?.timestamp ? parseInt(block.timestamp) * 1000 : Date.now(),
+              blockNumber: parseInt(log.blockNumber, 16)
             };
-          });
-          
-          // Create product journey object with mock transaction data
-          const journey: ProductJourney = {
-            id: tokenAddress,
-            name: name,
-            type: "Electronics",
-            origin: "Manufacturing Facility",
-            harvestDate: mockTransactions[0].timestamp,
-            isOrganic: false,
-            sustainabilityScore: 85,
-            qualityChecks: [
-              {
-                inspector: "Quality Control",
-                timestamp: Date.now() - 25 * 24 * 60 * 60 * 1000,
-                report: "Product passed all quality checks",
-                score: 95,
-                passed: true
-              },
-              {
-                inspector: "Final Inspection",
-                timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000,
-                report: "Product ready for retail",
-                score: 98,
-                passed: true
-              }
-            ],
-            supplyChain: mockSupplyChain,
-            transactions: mockTransactions
-          };
-          
-          setProductJourney(journey);
-          setActiveTab("journey");
-          toast({
-            title: "Demo Mode",
-            description: "Using demo data due to API limitations. This is not real transaction data.",
-            variant: "default"
-          });
-          return;
-        }
-        
-        // Process transfer events to get transaction details
-        const transactions = await Promise.all(
-          transferEvents.map(async (log): Promise<Transaction | null> => {
-            try {
-              // Get block for timestamp
-              const block = await provider.getBlock(parseInt(log.blockNumber, 16));
-              
-              // Parse the log data
-              const from = "0x" + log.topics[1].slice(26);
-              const to = "0x" + log.topics[2].slice(26);
-              const value = log.data;
-              
-              console.log("Transfer event:", { from, to, amount: ethers.formatUnits(value, decimals) });
-              
-              return {
-                hash: log.transactionHash,
-                from,
-                to,
-                value,
-                timestamp: block?.timestamp ? block.timestamp * 1000 : Date.now(),
-                blockNumber: parseInt(log.blockNumber, 16)
-              };
-            } catch (error) {
-              console.error("Error processing event:", error);
-              return null;
-            }
-          })
-        );
-
-        // Filter out any null transactions
-        const validTransactions = transactions.filter((tx): tx is Transaction => tx !== null);
-        console.log(validTransactions)
-        // Create supply chain from transactions
-        const eventSupplyChain: SupplyChainStage[] = validTransactions.map((tx, index) => {
-          let stage = "Unknown";
-          if (tx.from === ethers.ZeroAddress) {
-            stage = "Production";
-          } else if (index === validTransactions.length - 1) {
-            stage = "Retail";
-          } else {
-            stage = "Distribution";
+          } catch (error) {
+            console.error("Error processing event:", error);
+            return null;
           }
+        })
+      );
 
-          return {
-            stage,
-            address: tx.from === ethers.ZeroAddress ? tx.to : tx.from,
-            name: stage === "Production" ? "Manufacturer" : 
-                  stage === "Distribution" ? "Distributor" : 
-                  stage === "Retail" ? "Retailer" : "Unknown",
-            timestamp: tx.timestamp,
-            location: "Blockchain verified",
-            notes: `Transfer: ${ethers.formatUnits(tx.value, decimals)} tokens`,
-            txHash: tx.hash
-          };
-        });
+      // Filter out any null transactions
+      const validTransactions = transactions.filter((tx): tx is Transaction => tx !== null);
 
-        // Create product journey object
-        const journey: ProductJourney = {
-          id: tokenAddress,
-          name: name,
-          type: "Electronics",
-          origin: "Manufacturing Facility",
-          harvestDate: validTransactions.length > 0 ? validTransactions[0].timestamp : Date.now(),
-          isOrganic: false,
-          sustainabilityScore: 85,
-          qualityChecks: [
-            {
-              inspector: "Quality Control",
-              timestamp: Date.now() - 25 * 24 * 60 * 60 * 1000,
-              report: "Product passed all quality checks",
-              score: 95,
-              passed: true
-            },
-            {
-              inspector: "Final Inspection",
-              timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000,
-              report: "Product ready for retail",
-              score: 98,
-              passed: true
-            }
-          ],
-          supplyChain: eventSupplyChain,
-          transactions: validTransactions
+      // Create supply chain from transactions
+      const supplyChain: SupplyChainStage[] = validTransactions.map((tx, index) => {
+        let stage = "Unknown";
+        if (tx.from === ethers.ZeroAddress) {
+          stage = "Production";
+        } else if (index === validTransactions.length - 1) {
+          stage = "Retail";
+        } else {
+          stage = "Distribution";
+        }
+
+        return {
+          stage,
+          address: tx.from === ethers.ZeroAddress ? tx.to : tx.from,
+          name: stage === "Production" ? "Manufacturer" : 
+                stage === "Distribution" ? "Distributor" : 
+                stage === "Retail" ? "Retailer" : "Unknown",
+          timestamp: tx.timestamp,
+          location: "Blockchain verified",
+          notes: `Transfer: ${formatTokenAmount(tx.value, decimals)} tokens`,
+          txHash: tx.hash
         };
+      });
 
-        setProductJourney(journey);
-        setActiveTab("journey");
-      } catch (error) {
-        console.error("Error processing token data:", error);
-        setError("Failed to process token data");
-      }
+      // Create product journey object
+      const journey: ProductJourney = {
+        id: tokenAddress,
+        name: name,
+        type: "Product",
+        origin: "Manufacturing Facility",
+        harvestDate: validTransactions.length > 0 ? validTransactions[0].timestamp : Date.now(),
+        isOrganic: false,
+        sustainabilityScore: 85,
+        qualityChecks: [
+          {
+            inspector: "Quality Control",
+            timestamp: Date.now() - 25 * 24 * 60 * 60 * 1000,
+            report: "Product passed all quality checks",
+            score: 95,
+            passed: true
+          },
+          {
+            inspector: "Final Inspection",
+            timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000,
+            report: "Product ready for retail",
+            score: 98,
+            passed: true
+          }
+        ],
+        supplyChain: supplyChain,
+        transactions: validTransactions
+      };
+
+      setProductJourney(journey);
+      setActiveTab("journey");
     } catch (error) {
-      console.error("Error with standard ERC20 fallback:", error);
-      setError("Failed to fetch token data. Please check the address and try again.");
+      console.error("Error processing token data:", error);
+      if (error instanceof Error) {
+        setError(error.message || "Failed to process token data. Please check the address and try again.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Helper function to get token details from Alchemy
+  const getTokenDetails = async (tokenAddress: string, alchemyUrl: string) => {
+    // Get token name
+    const nameResponse = await fetch(alchemyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [{
+          to: tokenAddress,
+          data: "0x06fdde03" // name() function selector
+        }, "latest"]
+      })
+    });
+    const nameData = await nameResponse.json();
+    const name = decodeString(nameData.result);
+    
+    // Get token symbol
+    const symbolResponse = await fetch(alchemyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 2,
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [{
+          to: tokenAddress,
+          data: "0x95d89b41" // symbol() function selector
+        }, "latest"]
+      })
+    });
+    const symbolData = await symbolResponse.json();
+    const symbol = decodeString(symbolData.result);
+    
+    // Get token decimals
+    const decimalsResponse = await fetch(alchemyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 3,
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [{
+          to: tokenAddress,
+          data: "0x313ce567" // decimals() function selector
+        }, "latest"]
+      })
+    });
+    const decimalsData = await decimalsResponse.json();
+    const decimals = parseInt(decimalsData.result, 16);
+    
+    // Get token total supply
+    const totalSupplyResponse = await fetch(alchemyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 4,
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [{
+          to: tokenAddress,
+          data: "0x18160ddd" // totalSupply() function selector
+        }, "latest"]
+      })
+    });
+    const totalSupplyData = await totalSupplyResponse.json();
+    const totalSupply = totalSupplyData.result;
+    
+    return { name, symbol, decimals, totalSupply };
+  };
+
+  // Helper function to get block details from Alchemy
+  const getBlockDetails = async (blockNumber: string, alchemyUrl: string) => {
+    const response = await fetch(alchemyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: "2.0",
+        method: "eth_getBlockByNumber",
+        params: [blockNumber, false]
+      })
+    });
+    
+    const data = await response.json();
+    return data.result;
+  };
+
+  // Helper function to decode string from hex
+  const decodeString = (hex: string): string => {
+    // Remove the 0x prefix and the length prefix (first 64 characters)
+    const hexString = hex.slice(2 + 64);
+    // Convert hex to string
+    let str = '';
+    for (let i = 0; i < hexString.length; i += 2) {
+      const charCode = parseInt(hexString.slice(i, i + 2), 16);
+      if (charCode === 0) break; // Stop at null terminator
+      str += String.fromCharCode(charCode);
+    }
+    return str;
+  };
+
+  // Helper function to format token amount
+  const formatTokenAmount = (hexAmount: string, decimals: number): string => {
+    const amount = BigInt(hexAmount);
+    const divisor = BigInt(10) ** BigInt(decimals);
+    const integerPart = amount / divisor;
+    const fractionalPart = amount % divisor;
+    return `${integerPart}.${fractionalPart.toString().padStart(decimals, '0')}`;
+  };
+
+  // Helper function to get transfer events from Alchemy
+  const getTransferEvents = async (tokenAddress: string, alchemyUrl: string): Promise<TransferLog[]> => {
+    const transferEventSignature = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+    
+    const requestBody = {
+      id: 1,
+      jsonrpc: "2.0",
+      method: "eth_getLogs",
+      params: [{
+        address: tokenAddress,
+        fromBlock: "0x0", // Start from genesis
+        toBlock: "latest",
+        topics: [transferEventSignature]
+      }]
+    };
+    
+    const response = await fetch(alchemyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      throw new Error(data.error.message || "Failed to fetch transfer events");
+    }
+
+    return data.result || [];
+  };
+
   return (
     <DashboardLayout userRole="consumer">
+      <style jsx global>{`
+        #qr-video {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        #qr-video + canvas {
+          will-read-frequently: true;
+        }
+      `}</style>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Product Scanner</h1>
@@ -590,11 +617,22 @@ export default function ScanPage() {
             {showScanner && (
               <div className="mb-6 p-4 border border-gray-200 rounded-lg">
                 <h3 className="text-lg font-medium mb-2">Scan QR Code</h3>
-                <div className="max-w-md mx-auto">
+                <div className="relative w-full max-w-md mx-auto aspect-video">
                   <QrReader
-                    constraints={{ facingMode: 'environment' }}
+                    constraints={{ 
+                      facingMode: 'environment',
+                      width: { ideal: 1280 },
+                      height: { ideal: 720 }
+                    }}
                     onResult={handleScanResult}
-                    className="w-full"
+                    className="w-full h-full"
+                    videoStyle={{ 
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '0.5rem'
+                    }}
+                    videoId="qr-video"
                   />
                 </div>
               </div>

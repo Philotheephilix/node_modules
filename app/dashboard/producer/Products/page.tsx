@@ -9,7 +9,7 @@ import { Input } from "../../../../components/ui/input"
 import { Label } from "../../../../components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
-import { Leaf, Plus } from "lucide-react"
+import { Leaf, Plus, QrCode } from "lucide-react"
 import React from "react"
 import TokenFactoryABI from "../../../../contracts/TokenFactory.json"
 import SupplyTokenABI from "../../../../contracts/SupplyToken.json"
@@ -260,7 +260,6 @@ export default function ProductsPage() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="pb-2">
-
                             <div className="flex items-center justify-between">
                                 <span className="text-sm">Supply</span>
                                 <div className="flex items-center gap-1">
@@ -268,16 +267,21 @@ export default function ProductsPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between mt-4">
                               <span className="text-sm">Token Address</span>
-                                  <div className="flex items-center gap-1">
-                                  <img 
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${Product.id}`}
-                                    alt={`QR Code for ${Product.id}`}
-                                    className="h-20 w-20"
-                                  />
-                                  </div>
-                                </div>
+                              <div className="flex items-center gap-2">
+                                <code className="text-xs bg-muted px-2 py-1 rounded">
+                                  {Product.id.substring(0, 6)}...{Product.id.substring(38)}
+                                </code>
+                              </div>
+                            </div>
+                            <div className="flex justify-center mt-4">
+                              <img 
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${Product.id}`}
+                                alt={`QR Code for ${Product.id}`}
+                                className="h-32 w-32 rounded-lg border"
+                              />
+                            </div>
                                 <div className="flex flex-col space-y-2 mt-4">
                                   <div className="flex items-center gap-2">
                                     <Input
