@@ -160,7 +160,7 @@ export default function DashboardPage() {
 
               // Process logs if we have any
               if (logs && logs.length > 0) {
-                transfers = await Promise.all(logs.map(async (log: { blockNumber: ethers.BlockTag; data: ethers.BytesLike; topics: readonly string[] | undefined; transactionHash: any }) => {
+                transfers = await Promise.all(logs.map(async (log: { blockNumber: number; data: ethers.BytesLike; topics: readonly string[] | undefined; transactionHash: any }) => {
                   const block = await provider.getBlock(log.blockNumber)
                   // Decode the log data
                   const decodedLog = tokenContract.interface.decodeEventLog(

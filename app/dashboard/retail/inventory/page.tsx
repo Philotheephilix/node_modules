@@ -258,6 +258,31 @@ export default function InventoryPage() {
     return total + (100 - token.quantity)
   }, 0)
 
+  // Helper function to format large numbers
+  const formatLargeNumber = (num: number): string => {
+    const isNegative = num < 0
+    const absNum = Math.abs(num)
+    
+    // Handle very large numbers (trillions and above)
+    if (absNum >= 1e12) {
+      return `${isNegative ? '-' : ''}${(absNum / 1e12).toFixed(1)}T`
+    }
+    // Handle billions
+    if (absNum >= 1e9) {
+      return `${isNegative ? '-' : ''}${(absNum / 1e9).toFixed(1)}B`
+    }
+    // Handle millions
+    if (absNum >= 1e6) {
+      return `${isNegative ? '-' : ''}${(absNum / 1e6).toFixed(1)}M`
+    }
+    // Handle thousands
+    if (absNum >= 1e3) {
+      return `${isNegative ? '-' : ''}${(absNum / 1e3).toFixed(1)}K`
+    }
+    // For small numbers, limit decimal places to 2
+    return `${isNegative ? '-' : ''}${absNum.toFixed(2)}`
+  }
+
   const lowStock = tokens.filter(token => token.quantity < 10)
 
   return (
@@ -279,7 +304,7 @@ export default function InventoryPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">₹{totalRevenue.toLocaleString()}</div>
+              <div className="text-3xl font-bold">₹{formatLargeNumber(totalRevenue)}</div>
               <p className="text-xs text-muted-foreground">Last 30 days</p>
             </CardContent>
           </Card>
@@ -292,7 +317,7 @@ export default function InventoryPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{totalSales}</div>
+              <div className="text-3xl font-bold">{formatLargeNumber(totalSales)}</div>
               <p className="text-xs text-muted-foreground">Units sold</p>
             </CardContent>
           </Card>
@@ -418,7 +443,7 @@ export default function InventoryPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="rounded-lg bg-muted p-3">
                           <div className="text-sm font-medium">Sales</div>
-                          <div className="text-2xl font-bold">{100 - token.quantity}</div>
+                          <div className="text-2xl font-bold">{formatLargeNumber(100 - token.quantity)}</div>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <TrendingUp className="h-3 w-3" />
                             <span>Last 30 days</span>
@@ -426,7 +451,7 @@ export default function InventoryPage() {
                         </div>
                         <div className="rounded-lg bg-muted p-3">
                           <div className="text-sm font-medium">Revenue</div>
-                          <div className="text-2xl font-bold">₹{revenue.toLocaleString()}</div>
+                          <div className="text-2xl font-bold">₹{formatLargeNumber(revenue)}</div>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <DollarSign className="h-3 w-3" />
                             <span>Per unit: ₹{price.toFixed(2)}</span>
