@@ -63,10 +63,9 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
         { name: "Distribution", href: "/dashboard/supplier/distribute", icon: Truck },
       ],
       retailer: [
-      { name: "Dashboard", href: "/dashboard/retailer", icon: Home },
-        { name: "Inventory", href: "/dashboard/retailer/inventory", icon: FileText },
-        { name: "Sales", href: "/dashboard/retailer/sales", icon: ShoppingBag },
-        { name: "Waste Management", href: "/dashboard/retailer/waste", icon: Trash2 },
+      { name: "Dashboard", href: "/dashboard/retail", icon: Home },
+        { name: "Inventory", href: "/dashboard/retail/inventory", icon: FileText },
+        { name: "Sales", href: "/dashboard/retail/sales", icon: ShoppingBag },
       ],
       consumer: [
       { name: "Dashboard", href: "/dashboard/consumer", icon: Home },

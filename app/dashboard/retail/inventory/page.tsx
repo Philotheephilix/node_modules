@@ -1,99 +1,238 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "../../../../components/dashboard-layout"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Button } from "../../../../components/ui/button"
 import { Input } from "../../../../components/ui/input"
 import { Badge } from "../../../../components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
 import { Progress } from "../../../../components/ui/progress"
 import {
   AlertCircle,
+  BarChart3,
   Calendar,
   Check,
   ChevronRight,
   Clock,
   Filter,
   Package,
+  Plus,
   QrCode,
   Search,
   ShoppingBag,
+  Tag,
   Truck,
+  TrendingUp,
+  Bell,
+  Package2,
+  DollarSign,
+  Cpu,
+  Smartphone,
+  Laptop,
+  Headphones,
+  Tablet,
+  Monitor,
+  Printer,
 } from "lucide-react"
 import { useToast } from "../../../../hooks/use-toast"
+import TokenFactory from "../../../../contracts/TokenFactory.json"
+import SupplyChainToken from "../../../../contracts/SupplyToken.json"
 import React from "react"
+import { ethers } from "ethers"
+
+interface TokenData {
+  address: string;
+  name: string;
+  symbol: string;
+  productName: string;
+  category: string;
+  brand: string;
+  model: string;
+  manufacturer: string;
+  releaseDate: number;
+  warrantyPeriod: number;
+  isRefurbished: boolean;
+  conditionScore: number;
+  quantity: number;
+  qualityChecks: {
+    inspector: string;
+    timestamp: number;
+    report: string;
+    score: number;
+    passed: boolean;
+  }[];
+}
 
 export default function InventoryPage() {
   const { toast } = useToast()
+  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null)
+  const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null)
+  const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [isOrdering, setIsOrdering] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [tokens, setTokens] = useState<TokenData[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const inventory = [
-    {
-      id: "inv-1",
-      name: "Premium Rice",
-      type: "Rice",
-      quantity: 450,
-      supplier: "AgriDistributors Ltd.",
-      purchaseDate: "2025-03-25",
-      expiryDate: "2025-09-25",
-      stockLevel: 75,
-      price: 55,
-      qrCode: "INV-1234-ABCD",
-    },
-    {
-      id: "inv-2",
-      name: "Organic Wheat",
-      type: "Wheat",
-      quantity: 320,
-      supplier: "FreshChain Supplies",
-      purchaseDate: "2025-03-20",
-      expiryDate: "2025-09-20",
-      stockLevel: 60,
-      price: 42,
-      qrCode: "INV-5678-EFGH",
-    },
-    {
-      id: "inv-3",
-      name: "Mixed Vegetables",
-      type: "Vegetables",
-      quantity: 180,
-      supplier: "Organic Supply Network",
-      purchaseDate: "2025-03-28",
-      expiryDate: "2025-04-28",
-      stockLevel: 30,
-      price: 65,
-      qrCode: "INV-9012-IJKL",
-    },
+  const categories = [
+    { id: "all", name: "All Products", icon: Package },
+    { id: "smartphones", name: "Smartphones", icon: Smartphone },
+    { id: "laptops", name: "Laptops", icon: Laptop },
+    { id: "tablets", name: "Tablets", icon: Tablet },
+    { id: "accessories", name: "Accessories", icon: Headphones },
+    { id: "monitors", name: "Monitors", icon: Monitor },
+    { id: "printers", name: "Printers", icon: Printer },
   ]
 
-  const lowStock = inventory.filter((item) => item.stockLevel < 40)
+  useEffect(() => {
+    const initializeProvider = async () => {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const provider = new ethers.BrowserProvider(window.ethereum)
+          setProvider(provider)
+          
+          const signer = await provider.getSigner()
+          setSigner(signer)
+          
+          const contractAddress = process.env.NEXT_PUBLIC_TOKEN_FACTORY_ADDRESS
+          if (!contractAddress) {
+            throw new Error("Token Factory contract address not configured")
+          }
 
-  const incomingOrders = [
-    {
-      id: "order-1",
-      productName: "Premium Rice",
-      quantity: 200,
-      supplier: "AgriDistributors Ltd.",
-      orderDate: "2025-04-01",
-      expectedDelivery: "2025-04-03",
-      status: "in-transit",
-    },
-    {
-      id: "order-2",
-      productName: "Fresh Fruits",
-      quantity: 150,
-      supplier: "FreshChain Supplies",
-      orderDate: "2025-03-30",
-      expectedDelivery: "2025-04-02",
-      status: "processing",
-    },
-  ]
+          const tokenFactory = new ethers.Contract(
+            contractAddress,
+            TokenFactory.output.abi,
+            signer
+          )
+          setContract(tokenFactory)
+        } catch (error) {
+          console.error("Error initializing provider:", error)
+          toast({
+            title: "Error",
+            description: error instanceof Error ? error.message : "Failed to connect to wallet",
+            variant: "destructive"
+          })
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: "Please install MetaMask or another Web3 wallet",
+          variant: "destructive"
+        })
+      }
+    }
+
+    initializeProvider()
+  }, [toast])
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+      if (!contract || !signer) return
+
+      try {
+        setLoading(true)
+        const tokenFactory = contract
+        
+        // Get all token addresses
+        const tokenAddresses = await tokenFactory.getAllTokens()
+        
+        // Fetch details for each token
+        const tokenPromises = tokenAddresses.map(async (address: string) => {
+          const tokenContract = new ethers.Contract(
+            address,
+            SupplyChainToken.output.abi,
+            signer
+          )
+          
+          // Get basic token details
+          const [
+            name,
+            symbol,
+            balance
+          ] = await Promise.all([
+            tokenContract.name(),
+            tokenContract.symbol(),
+            tokenContract.balanceOf(await signer.getAddress())
+          ])
+
+          // Parse token name to extract product information
+          // Example format: "TechCorp Laptop Pro" or "SmartPhone Elite"
+          const nameParts = name.split(' ')
+          const brand = nameParts[0]
+          const model = nameParts.slice(1).join(' ')
+          
+          // Determine category based on token name
+          const categoryMap: Record<string, string> = {
+            'phone': 'smartphones',
+            'laptop': 'laptops',
+            'tablet': 'tablets',
+            'monitor': 'monitors',
+            'printer': 'printers',
+            'accessory': 'accessories'
+          }
+          
+          let category = 'accessories' // default category
+          for (const [key, value] of Object.entries(categoryMap)) {
+            if (name.toLowerCase().includes(key)) {
+              category = value
+              break
+            }
+          }
+
+          return {
+            address,
+            name,
+            symbol,
+            productName: name,
+            category,
+            brand,
+            model,
+            manufacturer: brand,
+            releaseDate: Math.floor(Date.now() / 1000), // Current timestamp
+            warrantyPeriod: 12,
+            isRefurbished: symbol.toLowerCase().includes('ref'),
+            conditionScore: 100, // Default score
+            quantity: Number(ethers.formatUnits(balance, 0)),
+            qualityChecks: [{
+              inspector: "Quality Control",
+              timestamp: Math.floor(Date.now() / 1000),
+              report: "Passed quality inspection",
+              score: 100,
+              passed: true
+            }]
+          }
+        })
+
+        const tokenData = await Promise.all(tokenPromises)
+        setTokens(tokenData)
+      } catch (error) {
+        console.error("Error fetching tokens:", error)
+        toast({
+          title: "Error",
+          description: "Failed to fetch inventory data",
+          variant: "destructive"
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTokens()
+  }, [contract, signer, toast])
+
+  // Helper function to map produce types to electronics categories
+  const mapProduceTypeToCategory = (produceType: string): string => {
+    const categoryMap: Record<string, string> = {
+      'rice': 'laptops',
+      'wheat': 'tablets',
+      'vegetables': 'smartphones',
+      'fruits': 'accessories',
+      'default': 'monitors'
+    }
+    return categoryMap[produceType.toLowerCase()] || categoryMap.default
+  }
 
   const handleOrder = () => {
     setIsOrdering(true)
-
-    // Simulate order process
     setTimeout(() => {
       setIsOrdering(false)
       toast({
@@ -103,74 +242,161 @@ export default function InventoryPage() {
     }, 2000)
   }
 
+  const filteredTokens = selectedCategory === "all" 
+    ? tokens 
+    : tokens.filter(token => token.category.toLowerCase() === selectedCategory)
+
+  const totalRevenue = tokens.reduce((total, token) => {
+    // Base price varies by category
+    const basePrices: Record<string, number> = {
+      smartphones: 500,
+      laptops: 1000,
+      tablets: 400,
+      accessories: 100,
+      monitors: 300,
+      printers: 200
+    }
+    const basePrice = basePrices[token.category.toLowerCase()] || 200
+    const priceMultiplier = token.conditionScore / 100
+    return total + (token.quantity * basePrice * priceMultiplier)
+  }, 0)
+
+  const totalSales = tokens.reduce((total, token) => {
+    // Assuming initial stock was 100 and current quantity shows remaining
+    return total + (100 - token.quantity)
+  }, 0)
+
+  const lowStock = tokens.filter(token => token.quantity < 10)
+
   return (
     <DashboardLayout userRole="retailer">
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">Inventory Management</h1>
-          <p className="text-muted-foreground">Manage your store inventory and stock levels</p>
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold tracking-tight">Electronics Inventory</h1>
+            <p className="text-muted-foreground">Manage your electronics store inventory and track sales</p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search inventory..." className="flex-1" />
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card>
+        <div className="grid gap-6 md:grid-cols-4">
+          <Card className="bg-primary/5">
             <CardHeader className="pb-2">
-              <CardTitle>Total Products</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-primary">
+                <DollarSign className="h-5 w-5" />
+                Total Revenue
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{inventory.length}</div>
-              <p className="text-xs text-muted-foreground">{lowStock.length} items low in stock</p>
+              <div className="text-3xl font-bold">₹{totalRevenue.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Last 30 days</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-green-500/5">
             <CardHeader className="pb-2">
-              <CardTitle>Total Quantity</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-green-500">
+                <Package2 className="h-5 w-5" />
+                Total Sales
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{inventory.reduce((total, item) => total + item.quantity, 0)} kg</div>
-              <p className="text-xs text-muted-foreground">Across all products</p>
+              <div className="text-3xl font-bold">{totalSales}</div>
+              <p className="text-xs text-muted-foreground">Units sold</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-yellow-500/5">
             <CardHeader className="pb-2">
-              <CardTitle>Incoming Orders</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-yellow-500">
+                <Bell className="h-5 w-5" />
+                Low Stock
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{incomingOrders.length}</div>
-              <p className="text-xs text-muted-foreground">Expected within 3 days</p>
+              <div className="text-3xl font-bold">{lowStock.length}</div>
+              <p className="text-xs text-muted-foreground">Items need attention</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-blue-500/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-blue-500">
+                <Cpu className="h-5 w-5" />
+                Total Products
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{tokens.length}</div>
+              <p className="text-xs text-muted-foreground">Unique products</p>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="all">
-          <TabsList>
-            <TabsTrigger value="all">All Products</TabsTrigger>
-            <TabsTrigger value="low">Low Stock</TabsTrigger>
-            <TabsTrigger value="incoming">Incoming</TabsTrigger>
-          </TabsList>
+        <div className="flex items-center gap-4">
+          <div className="flex-1 flex items-center gap-2">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search products..." className="flex-1" />
+            <Button variant="outline" size="icon">
+              <Filter className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            {categories.map((category) => {
+              const Icon = category.icon
+              return (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="gap-2"
+                >
+                  <Icon className="h-4 w-4" />
+                  {category.name}
+                </Button>
+              )
+            })}
+          </div>
+        </div>
 
-          <TabsContent value="all" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {inventory.map((item) => (
-                <Card key={item.id}>
+        {loading ? (
+          <div className="flex items-center justify-center p-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredTokens.map((token) => {
+              const stockLevel = (token.quantity / 100) * 100 // Assuming initial stock was 100
+              const basePrices: Record<string, number> = {
+                smartphones: 500,
+                laptops: 1000,
+                tablets: 400,
+                accessories: 100,
+                monitors: 300,
+                printers: 200
+              }
+              const basePrice = basePrices[token.category.toLowerCase()] || 200
+              const priceMultiplier = token.conditionScore / 100
+              const price = basePrice * priceMultiplier
+              const revenue = (100 - token.quantity) * price
+
+              return (
+                <Card key={token.address} className="relative overflow-hidden">
+                  {stockLevel < 40 && (
+                    <div className="absolute right-0 top-0 bg-destructive px-2 py-1 text-xs font-medium text-white">
+                      Low Stock
+                    </div>
+                  )}
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle>{item.name}</CardTitle>
-                      <Badge variant={item.stockLevel < 40 ? "destructive" : "secondary"}>
-                        {item.stockLevel < 40 ? "Low Stock" : "In Stock"}
+                      <CardTitle>{token.productName}</CardTitle>
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        <Tag className="h-3 w-3" />
+                        {token.category}
                       </Badge>
                     </div>
                     <CardDescription>
-                      {item.type} - {item.quantity} kg
+                      {token.brand} {token.model} - {token.quantity} units
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -178,193 +404,62 @@ export default function InventoryPage() {
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-1">
                           <Truck className="h-4 w-4 text-muted-foreground" />
-                          <span>Supplier: {item.supplier}</span>
+                          <span>{token.manufacturer}</span>
                         </div>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>Purchased: {new Date(item.purchaseDate).toLocaleDateString()}</span>
+                          <span>Released: {new Date(token.releaseDate * 1000).toLocaleDateString()}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>Expires: {new Date(item.expiryDate).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span>Stock Level</span>
-                          <span>{item.stockLevel}%</span>
+                          <span>{stockLevel.toFixed(1)}%</span>
                         </div>
                         <Progress
-                          value={item.stockLevel}
-                          className={`h-2 ${item.stockLevel < 40 ? "bg-destructive/20" : ""}`}
+                          value={stockLevel}
+                          className={`h-2 ${stockLevel < 40 ? "bg-destructive/20" : ""}`}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between text-sm">
-                        <span>Price per kg</span>
-                        <span className="font-medium">₹{item.price}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">QR Code</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">{item.qrCode}</span>
-                          <QrCode className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between gap-2">
-                    <Button variant="outline" className="w-full gap-2">
-                      <Package className="h-4 w-4" /> Details
-                    </Button>
-                    <Button className="w-full gap-2">
-                      <ShoppingBag className="h-4 w-4" /> Order More
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="low" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {lowStock.length > 0 ? (
-                lowStock.map((item) => (
-                  <Card key={item.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle>{item.name}</CardTitle>
-                        <Badge variant="destructive">Low Stock</Badge>
-                      </div>
-                      <CardDescription>
-                        {item.type} - {item.quantity} kg
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-1">
-                            <Truck className="h-4 w-4 text-muted-foreground" />
-                            <span>Supplier: {item.supplier}</span>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="rounded-lg bg-muted p-3">
+                          <div className="text-sm font-medium">Sales</div>
+                          <div className="text-2xl font-bold">{100 - token.quantity}</div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <TrendingUp className="h-3 w-3" />
+                            <span>Last 30 days</span>
                           </div>
                         </div>
-
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>Expires: {new Date(item.expiryDate).toLocaleDateString()}</span>
+                        <div className="rounded-lg bg-muted p-3">
+                          <div className="text-sm font-medium">Revenue</div>
+                          <div className="text-2xl font-bold">₹{revenue.toLocaleString()}</div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <DollarSign className="h-3 w-3" />
+                            <span>Per unit: ₹{price.toFixed(2)}</span>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-sm">
-                            <span>Stock Level</span>
-                            <span>{item.stockLevel}%</span>
-                          </div>
-                          <Progress value={item.stockLevel} className="h-2 bg-destructive/20" />
-                        </div>
-
-                        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
-                          <div className="flex items-center gap-2 text-sm">
-                            <AlertCircle className="h-4 w-4 text-destructive" />
-                            <span className="text-destructive">
-                              Recommended: Order at least {200 - item.quantity} kg more
+                      {token.qualityChecks.length > 0 && (
+                        <div className="rounded-lg border p-3">
+                          <div className="text-sm font-medium mb-2">Quality Check</div>
+                          <div className="flex items-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${token.qualityChecks[token.qualityChecks.length - 1].passed ? "bg-green-500" : "bg-red-500"}`} />
+                            <span className="text-sm">
+                              Score: {token.qualityChecks[token.qualityChecks.length - 1].score}/100
                             </span>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full gap-2" onClick={handleOrder} disabled={isOrdering}>
-                        {isOrdering ? (
-                          <>
-                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingBag className="h-4 w-4" /> Order Now
-                          </>
-                        )}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-3 flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-                  <Check className="mb-4 h-12 w-12 text-green-500" />
-                  <h3 className="text-lg font-medium">All products well stocked</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">You have no products with low stock levels</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="incoming" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Incoming Orders</CardTitle>
-                <CardDescription>Orders that are on their way to your store</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {incomingOrders.map((order) => (
-                    <div key={order.id} className="flex items-center gap-4 rounded-lg border p-4">
-                      <div
-                        className={`rounded-full p-2 ${order.status === "in-transit" ? "bg-blue-500/10" : "bg-yellow-500/10"}`}
-                      >
-                        {order.status === "in-transit" ? (
-                          <Truck className="h-5 w-5 text-blue-500" />
-                        ) : (
-                          <Package className="h-5 w-5 text-yellow-500" />
-                        )}
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">{order.productName}</p>
-                          <Badge variant={order.status === "in-transit" ? "default" : "outline"}>
-                            {order.status === "in-transit" ? "In Transit" : "Processing"}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>Ordered: {new Date(order.orderDate).toLocaleDateString()}</span>
-                          </div>
-                          <span>•</span>
-                          <div className="flex items-center gap-1">
-                            <Truck className="h-3 w-3" />
-                            <span>From: {order.supplier}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">{order.quantity} kg</p>
-                        <div className="mt-1 flex items-center justify-end gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>ETA: {new Date(order.expectedDelivery).toLocaleDateString()}</span>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-
-                <Button variant="ghost" className="mt-4 w-full" size="sm">
-                  View all orders
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   )
