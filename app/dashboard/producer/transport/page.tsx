@@ -16,7 +16,7 @@ import React from "react"
 import TokenFactoryABI from "../../../../contracts/TokenFactory.json"
 import SupplyTokenABI from "../../../../contracts/SupplyToken.json"
 
-const TOKEN_FACTORY_ADDRESS = "0x8B27D610897208ad9A7b5A531bb90b5726ab8337"
+const TOKEN_FACTORY_ADDRESS = "0xf88C501cBA1DB713c080F886c74DB87ffd616FB2"
 
 interface TokenTransaction {
   from: string;
