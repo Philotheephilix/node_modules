@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -32,17 +32,16 @@ import {
 } from "../components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet"
 import { cn } from "../lib/utils"
-import { useMobile } from "../hooks/use-mobile"
 import { Loader } from "../app/components/ui/loader"
 
-type UserRole = "farmer" | "supplier" | "retailer" | "consumer" | "government" | "waste"
+type UserRole = "producer" | "supplier" | "retailer" | "consumer" | "government" | "waste"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
-  userRole?: UserRole
+  userRole: UserRole
 }
 
-export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayoutProps) {
+export function DashboardLayout({ children, userRole = "producer" }: DashboardLayoutProps) {
   const pathname = usePathname()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -53,10 +52,10 @@ export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayo
       { name: "Dashboard", href: "/dashboard", icon: Home },
     ]
 
-    const roleSpecificItems = {
-      farmer: [
-        { name: "My Products", href: "/dashboard/Products", icon: Leaf },
-        { name: "Transport Status", href: "/dashboard/transport", icon: Truck },
+    const roleSpecificItems: Record<UserRole, Array<{ name: string; href: string; icon: any }>> = {
+      producer: [
+        { name: "My Crops", href: "/dashboard/producer/Products", icon: Leaf },
+        { name: "Transport Status", href: "/dashboard/producer/transport", icon: Truck },
       ],
       supplier: [
         { name: "Buy from Farmers", href: "/dashboard/buy", icon: ShoppingBag },
@@ -85,13 +84,13 @@ export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayo
       ],
     }
 
-    return [...commonItems, ...roleSpecificItems[role]]
+    return [...commonItems, ...(roleSpecificItems[role] || [])]
   }
 
   const navItems = getRoleNavItems(userRole)
 
   const roleLabels = {
-    farmer: "Farmer",
+    producer: "Producer",
     supplier: "Supplier/Distributor",
     retailer: "Retailer",
     consumer: "Consumer",
@@ -194,6 +193,11 @@ export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayo
       <div className="flex-1 items-start md:grid md:grid-cols-[240px_1fr] lg:grid-cols-[280px_1fr]">
         <aside className="fixed top-0 z-30 hidden h-screen w-full shrink-0 border-r md:sticky md:block">
           <div className="flex h-full flex-col gap-2">
+            <div className="flex h-14 items-center border-b px-4">
+              <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+                SupplyChain
+              </Link>
+            </div>
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid items-start px-2 text-sm font-medium">
                 {navItems.map((item, index) => (
@@ -249,6 +253,49 @@ export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayo
         </aside>
 
         <main className="flex flex-col">
+          <header className="sticky top-0 z-20 hidden h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:flex lg:h-[60px]">
+            <div className="w-full flex-1">
+              <form>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search..."
+                    className="w-full bg-background pl-8 md:w-2/3 lg:w-1/3"
+                  />
+                </div>
+              </form>
+            </div>
+            <Button variant="ghost" size="icon">
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Notifications</span>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="/placeholder.svg" alt="User" />
+                    <AvatarFallback>U</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/auth/logout">Log out</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </header>
+
           <div className="flex-1 p-4 md:p-6">{children}</div>
         </main>
       </div>

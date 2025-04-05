@@ -2,13 +2,19 @@
 
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import { DashboardLayout } from "../../../components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Badge } from "../../../components/ui/badge"
+
+declare global {
+  interface Window {
+    ethereum?: any
+  }
+}
+import { DashboardLayout } from "../../../../components/dashboard-layout"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Badge } from "../../../../components/ui/badge"
 import { QrCode } from "lucide-react"
 import React from "react"
-import TokenFactoryABI from "../../../contracts/TokenFactory.json"
-import SupplyTokenABI from "../../../contracts/SupplyToken.json"
+import TokenFactoryABI from "../../../../contracts/TokenFactory.json"
+import SupplyTokenABI from "../../../../contracts/SupplyToken.json"
 
 const TOKEN_FACTORY_ADDRESS = "0x8B27D610897208ad9A7b5A531bb90b5726ab8337"
 
@@ -115,7 +121,7 @@ export default function CropsPage() {
   }, [])
   
   return (
-    <DashboardLayout userRole="farmer">
+    <DashboardLayout userRole="producer">
       <div className="flex flex-col gap-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Crops</h1>

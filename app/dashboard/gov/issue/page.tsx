@@ -1,17 +1,18 @@
 "use client"
 
-import { Separator } from "../components/ui/separator"
+import { Separator } from "../../../../components/ui/separator"
 
 import { useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
-import { Button } from "../components/ui/button"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
-import { Badge } from "../components/ui/badge"
-import { Checkbox } from "../components/ui/checkbox"
+import { DashboardLayout } from "../../../../components/dashboard-layout"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
+import { Label } from "../../../../components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
+import { Badge } from "../../../../components/ui/badge"
+import { Checkbox } from "../../../../components/ui/checkbox"
 import { Calendar, ChevronRight, Clock, Filter, Search, Users, Wallet } from "lucide-react"
+import React from "react"
 
 export default function IssuePage() {
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([])
