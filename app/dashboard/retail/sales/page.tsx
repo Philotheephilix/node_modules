@@ -26,7 +26,7 @@ import { useToast } from "../../../../hooks/use-toast"
 import React from "react"
 import { ethers } from "ethers"
 import TokenFactory from "../../../../contracts/TokenFactory.json"
-import SupplyChainToken from "../../../../contracts/SupplyToken.json"
+import StockR00tToken from "../../../../contracts/SupplyToken.json"
 
 interface Transaction {
   id: string;
@@ -120,7 +120,7 @@ export default function SalesPage() {
           // Get token details
           const tokenContract = new ethers.Contract(
             address,
-            SupplyChainToken.output.abi,
+            StockR00tToken.output.abi,
             signer
           )
           
@@ -241,7 +241,7 @@ export default function SalesPage() {
       // Get token contract
       const tokenContract = new ethers.Contract(
         selectedProduct.address,
-        SupplyChainToken.output.abi,
+        StockR00tToken.output.abi,
         signer
       )
 

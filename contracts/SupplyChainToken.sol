@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract SupplyChainToken is ERC20, Ownable {
+contract StockR00tToken is ERC20, Ownable {
     // Produce metadata
     string public produceName;
     string public produceType;

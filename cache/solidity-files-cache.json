@@ -1,10 +1,10 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/home/philix/Documents/GitHub/crunchoco/contracts/SupplyChainToken.sol": {
+    "/home/philix/Documents/GitHub/crunchoco/contracts/StockR00tToken.sol": {
       "lastModificationDate": 1743788112277,
       "contentHash": "26c7bbf79ad0760f046096ecd6efb767",
-      "sourceName": "contracts/SupplyChainToken.sol",
+      "sourceName": "contracts/StockR00tToken.sol",
       "solcConfig": {
         "version": "0.8.28",
         "settings": {
@@ -44,7 +44,7 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "SupplyChainToken"
+        "StockR00tToken"
       ]
     },
     "/home/philix/Documents/GitHub/crunchoco/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
@@ -352,7 +352,7 @@
         }
       },
       "imports": [
-        "./SupplyChainToken.sol",
+        "./StockR00tToken.sol",
         "@openzeppelin/contracts/access/AccessControl.sol"
       ],
       "versionPragmas": [

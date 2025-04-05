@@ -8,7 +8,7 @@ import { Toaster } from "../components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "SupplyChain - Blockchain Supply Supply Chain",
+  title: "StockR00t - Blockchain Supply Supply Chain",
   description: "Track Supply from farm to table with blockchain technology",
   icons: {
     icon: '/StockR00t.png',

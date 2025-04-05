@@ -28,7 +28,7 @@ import {
 } from "lucide-react"
 import { useToast } from "../../../../hooks/use-toast"
 import TokenFactory from "../../../../contracts/TokenFactory.json"
-import SupplyChainToken from "../../../../contracts/SupplyToken.json"
+import StockR00tToken from "../../../../contracts/SupplyToken.json"
 import React from "react"
 import { ethers } from "ethers"
 
@@ -131,7 +131,7 @@ export default function InventoryPage() {
         const tokenPromises = tokenAddresses.map(async (address: string) => {
           const tokenContract = new ethers.Contract(
             address,
-            SupplyChainToken.output.abi,
+            StockR00tToken.output.abi,
             signer
           )
           

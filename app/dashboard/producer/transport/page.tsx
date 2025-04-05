@@ -37,7 +37,7 @@ interface CropToken {
   balance: string;
 }
 
-export default function CropsPage() {
+export default function ProductsPage() {
   const [cropTokens, setCropTokens] = useState<CropToken[]>([])
   const [loading, setLoading] = useState(true)
   const [account, setAccount] = useState("")
@@ -160,8 +160,8 @@ export default function CropsPage() {
     <DashboardLayout userRole="producer">
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Crops</h1>
-          <p className="text-muted-foreground">View your registered crops and their transaction history</p>
+          <h1 className="text-3xl font-bold tracking-tight">My Products</h1>
+          <p className="text-muted-foreground">View your registered Products and their transaction history</p>
         </div>
 
         {loading ? (

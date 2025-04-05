@@ -28,7 +28,7 @@ import React from "react"
 export default function MonitorPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
-  const supplyChainStats = {
+  const StockR00tStats = {
     activeTransactions: 1245,
     registeredFarmers: 2450,
     totalProducts: 156,
@@ -106,7 +106,7 @@ export default function MonitorPage() {
               <CardTitle>Active Transactions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{supplyChainStats.activeTransactions}</div>
+              <div className="text-3xl font-bold">{StockR00tStats.activeTransactions}</div>
               <p className="text-xs text-muted-foreground">Across the supply chain</p>
             </CardContent>
           </Card>
@@ -116,7 +116,7 @@ export default function MonitorPage() {
               <CardTitle>Registered Farmers</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{supplyChainStats.registeredFarmers}</div>
+              <div className="text-3xl font-bold">{StockR00tStats.registeredFarmers}</div>
               <p className="text-xs text-muted-foreground">+120 this month</p>
             </CardContent>
           </Card>
@@ -126,7 +126,7 @@ export default function MonitorPage() {
               <CardTitle>Total Products</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{supplyChainStats.totalProducts}</div>
+              <div className="text-3xl font-bold">{StockR00tStats.totalProducts}</div>
               <p className="text-xs text-muted-foreground">Being tracked on blockchain</p>
             </CardContent>
           </Card>
@@ -136,7 +136,7 @@ export default function MonitorPage() {
               <CardTitle>Avg. Journey Time</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{supplyChainStats.averageJourneyTime} days</div>
+              <div className="text-3xl font-bold">{StockR00tStats.averageJourneyTime} days</div>
               <p className="text-xs text-muted-foreground">Farm to retailer</p>
             </CardContent>
           </Card>

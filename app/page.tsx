@@ -1,10 +1,15 @@
 'use client';
 import Link from "next/link"
 import { Button } from "../components/ui/button"
-import { ArrowRight, Leaf, ShieldCheck, BarChart3, Truck, CheckCircle2, Eye } from "lucide-react"
+import { ArrowRight, Leaf, ShieldCheck, BarChart3, Truck, CheckCircle2, Eye, ExternalLink, Factory, Settings, ShoppingBag, Terminal, TruckIcon, User, Warehouse } from "lucide-react"
 import { Loader } from "./components/ui/loader"
 import { useState } from "react"
 import React from "react";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "../components/ui/dialog";
+import { Separator } from "../components/ui/separator";
+import { ScrollArea } from "../components/ui/scroll-area";
+import { Switch } from "../components/ui/switch";
+import { Label } from "../components/ui/label";
 
 const features = [
   {
@@ -69,7 +74,8 @@ const processSteps = [
 
 export default function WelcomePage() {
   const [isLoading, setIsLoading] = useState(false)
-
+  const [devMode, setDevMode] = useState(true);
+  const [showDevDialog, setShowDevDialog] = useState(false);
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-accent/20 to-background">
       <header className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-10">
@@ -103,6 +109,17 @@ export default function WelcomePage() {
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4 animate-fade-in">
+              <div className="flex justify-center mt-4 px-8 md:mt-0">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-blue-50 border-yellow-700 hover:bg-gradient-to-r hover:from-red-400 hover:to-red-100"
+                onClick={() => setShowDevDialog(true)}
+              >
+                <Terminal className="h-4 w-4 text-black-600" />
+                Developer Mode
+              </Button>
+            </div>
                 <div className="inline-block rounded-lg bg-accent px-3 py-1 text-sm text-accent-foreground mb-2">
                   Transparent Supply Supply Chain
                 </div>
@@ -312,6 +329,157 @@ export default function WelcomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Developer Mode Dialog */}
+      <Dialog open={showDevDialog} onOpenChange={setShowDevDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogTitle className="flex items-center gap-2">
+            <Terminal className="h-5 w-5 text-purple-600" />
+            Developer Mode
+          </DialogTitle>
+          <DialogDescription>
+            Access all dashboard routes for development and testing
+          </DialogDescription>
+          
+          <div className="flex items-center space-x-2 py-2">
+            <Switch 
+              id="dev-mode" 
+              checked={devMode} 
+              onCheckedChange={setDevMode} 
+            />
+            <Label htmlFor="dev-mode" className="text-sm font-medium">
+              {devMode ? "Developer Mode Enabled" : "Developer Mode Disabled"}
+            </Label>
+          </div>
+          
+          <Separator className="my-2" />
+          
+          <ScrollArea className="h-[300px] pr-4">
+            <div className="grid grid-cols-1 gap-4">
+              <h3 className="font-medium text-sm text-muted-foreground">Dashboard Routes</h3>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Factory className="h-3 w-3 text-blue-500" />
+                    Producer
+                  </h4>
+                  <div className="grid grid-cols-1 gap-1 pl-4">
+                    <Link href="/dashboard/producer" className="text-sm hover:underline flex items-center gap-1">
+                      Dashboard <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/producer/Products" className="text-sm hover:underline flex items-center gap-1">
+                      Products <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/producer/Inventory" className="text-sm hover:underline flex items-center gap-1">
+                      Inventory <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/producer/Quality" className="text-sm hover:underline flex items-center gap-1">
+                      Quality <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Warehouse className="h-3 w-3 text-green-500" />
+                    Supplier
+                  </h4>
+                  <div className="grid grid-cols-1 gap-1 pl-4">
+                    <Link href="/dashboard/supplier" className="text-sm hover:underline flex items-center gap-1">
+                      Dashboard <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/supplier/Orders" className="text-sm hover:underline flex items-center gap-1">
+                      Orders <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/supplier/Inventory" className="text-sm hover:underline flex items-center gap-1">
+                      Inventory <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <TruckIcon className="h-3 w-3 text-orange-500" />
+                    Distributor
+                  </h4>
+                  <div className="grid grid-cols-1 gap-1 pl-4">
+                    <Link href="/dashboard/distributor" className="text-sm hover:underline flex items-center gap-1">
+                      Dashboard <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/distributor/Orders" className="text-sm hover:underline flex items-center gap-1">
+                      Orders <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/distributor/Inventory" className="text-sm hover:underline flex items-center gap-1">
+                      Inventory <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <ShoppingBag className="h-3 w-3 text-purple-500" />
+                    Retailer
+                  </h4>
+                  <div className="grid grid-cols-1 gap-1 pl-4">
+                    <Link href="/dashboard/retail" className="text-sm hover:underline flex items-center gap-1">
+                      Dashboard <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/retail/Inventory" className="text-sm hover:underline flex items-center gap-1">
+                      Inventory <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/retail/Orders" className="text-sm hover:underline flex items-center gap-1">
+                      Orders <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <User className="h-3 w-3 text-blue-500" />
+                    Consumer
+                  </h4>
+                  <div className="grid grid-cols-1 gap-1 pl-4">
+                    <Link href="/dashboard/consumer" className="text-sm hover:underline flex items-center gap-1">
+                      Dashboard <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/consumer/scan" className="text-sm hover:underline flex items-center gap-1">
+                      Scan Product <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/consumer/Orders" className="text-sm hover:underline flex items-center gap-1">
+                      Orders <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Settings className="h-3 w-3 text-gray-500" />
+                    Government
+                  </h4>
+                  <div className="grid grid-cols-1 gap-1 pl-4">
+                    <Link href="/dashboard/government" className="text-sm hover:underline flex items-center gap-1">
+                      Dashboard <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/government/Compliance" className="text-sm hover:underline flex items-center gap-1">
+                      Compliance <ExternalLink className="h-3 w-3" />
+                    </Link>
+                    <Link href="/dashboard/government/Reports" className="text-sm hover:underline flex items-center gap-1">
+                      Reports <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDevDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
