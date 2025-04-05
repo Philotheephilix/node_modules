@@ -125,14 +125,14 @@ export default function WalletPage() {
                 <div className="rounded-lg border bg-card p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">Food Subsidy</p>
+                      <p className="text-sm font-medium">Supply Subsidy</p>
                       <p className="text-xs text-muted-foreground">Expires in 15 days</p>
                     </div>
                     <p className="text-lg font-bold">₹500</p>
                   </div>
                   <div className="mt-2 text-xs text-muted-foreground">
                     <Lock className="mr-1 inline-block h-3 w-3" />
-                    Can only be used for food purchases
+                    Can only be used for Supply purchases
                   </div>
                 </div>
                 
@@ -146,7 +146,7 @@ export default function WalletPage() {
                   </div>
                   <div className="mt-2 text-xs text-muted-foreground">
                     <Shield className="mr-1 inline-block h-3 w-3" />
-                    Earned by making sustainable food choices
+                    Earned by making sustainable Supply choices
                   </div>
                 </div>
               </div>

@@ -96,7 +96,7 @@ export default function MonitorPage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Supply Chain Monitor</h1>
-          <p className="text-muted-foreground">Real-time monitoring of the food supply chain</p>
+          <p className="text-muted-foreground">Real-time monitoring of the Supply supply chain</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-4">
@@ -314,7 +314,7 @@ export default function MonitorPage() {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span>Food Waste Reduction</span>
+                        <span>Supply Waste Reduction</span>
                         <span>+15% from last month</span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-secondary">
