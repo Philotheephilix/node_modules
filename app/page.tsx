@@ -1,9 +1,10 @@
 'use client';
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button } from "../components/ui/button"
 import { ArrowRight, Leaf, ShieldCheck, BarChart3, Truck, CheckCircle2, Eye } from "lucide-react"
 import { Loader } from "./components/ui/loader"
 import { useState } from "react"
+import React from "react";
 
 const features = [
   {
