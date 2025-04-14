@@ -48,7 +48,7 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
 
   // Role-specific navigation items
   const getRoleNavItems = (role: UserRole) => {
-    const commonItems = [
+    const commonItems: never[] = [
     ]
 
     const roleSpecificItems: Record<UserRole, Array<{ name: string; href: string; icon: any }>> = {
@@ -104,7 +104,7 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Mobile top navigation */}
-      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
         <div className="container flex h-14 items-center">
           <Sheet>
             <SheetTrigger asChild>

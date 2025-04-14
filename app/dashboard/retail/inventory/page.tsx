@@ -8,18 +8,10 @@ import { Input } from "../../../../components/ui/input"
 import { Badge } from "../../../../components/ui/badge"
 import { Progress } from "../../../../components/ui/progress"
 import {
-  AlertCircle,
-  BarChart3,
   Calendar,
-  Check,
-  ChevronRight,
-  Clock,
   Filter,
   Package,
-  Plus,
-  QrCode,
   Search,
-  ShoppingBag,
   Tag,
   Truck,
   TrendingUp,
@@ -272,10 +264,10 @@ export default function InventoryPage() {
     <DashboardLayout userRole="retailer">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight">Electronics Inventory</h1>
             <p className="text-muted-foreground">Manage your electronics store inventory and track sales</p>
-          </div>
+        </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-4">
@@ -364,7 +356,7 @@ export default function InventoryPage() {
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredTokens.map((token) => {
               const stockLevel = (token.quantity / 100) * 100 // Assuming initial stock was 100
               const basePrices: Record<string, number> = {
@@ -440,7 +432,7 @@ export default function InventoryPage() {
                             <span>Per unit: ₹{price.toFixed(2)}</span>
                           </div>
                         </div>
-                      </div>
+                        </div>
 
                       {token.qualityChecks.length > 0 && (
                         <div className="rounded-lg border p-3">
@@ -454,8 +446,8 @@ export default function InventoryPage() {
                         </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+              </CardContent>
+            </Card>
               )
             })}
           </div>
