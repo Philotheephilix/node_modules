@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs"
+import { Button } from "../components/ui/button"
+import { Progress } from "../components/ui/progress"
 import {
   BarChart,
   Calendar,

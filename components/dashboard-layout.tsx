@@ -19,9 +19,9 @@ import {
   Bell,
   Search,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,10 +29,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
-import { useMobile } from "@/hooks/use-mobile"
+} from "../components/ui/dropdown-menu"
+import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet"
+import { cn } from "../../lib/utils"
+import { useMobile } from "../../hooks/use-mobile"
 import { Loader } from "../app/components/ui/loader"
 
 type UserRole = "farmer" | "supplier" | "retailer" | "consumer" | "government" | "waste"
