@@ -10,6 +10,11 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "SupplyChain - Blockchain Supply Supply Chain",
   description: "Track Supply from farm to table with blockchain technology",
+  icons: {
+    icon: '/StockR00t.png',
+    shortcut: '/StockR00t.png',
+    apple: '/StockR00t.png',
+  },
 }
 
 export default function RootLayout({

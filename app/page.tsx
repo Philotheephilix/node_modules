@@ -129,7 +129,7 @@ export default function WelcomePage() {
                   <div className="absolute top-0 right-0 w-4/5 h-4/5 bg-primary/10 rounded-lg"></div>
                   <div className="absolute bottom-0 left-0 w-4/5 h-4/5 bg-accent rounded-lg"></div>
                   <div className="absolute inset-4 bg-card shadow-elevated rounded-lg overflow-hidden border border-border/50">
-                    <div className="w-full h-full bg-[url('/placeholder.svg?height=600&width=600')] bg-cover bg-center"></div>
+                    <div className="w-full h-full bg-[url('/StockR00t.png?height=600&width=600')] bg-cover bg-center"></div>
                   </div>
                 </div>
               </div>
@@ -224,7 +224,7 @@ export default function WelcomePage() {
               </div>
               <div className="flex items-center justify-center lg:justify-end">
                 <div className="relative w-full max-w-[500px] aspect-video rounded-lg overflow-hidden shadow-elevated border border-border/50">
-                  <div className="w-full h-full bg-[url('/placeholder.svg?height=400&width=600')] bg-cover bg-center"></div>
+                  <div className="w-full h-full bg-[url('/banner.png?height=400&width=600')] bg-cover bg-center"></div>
                 </div>
               </div>
             </div>
