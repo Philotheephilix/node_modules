@@ -156,7 +156,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <DashboardLayout userRole="supplier">
+    <DashboardLayout userRole="producer">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
