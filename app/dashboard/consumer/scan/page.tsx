@@ -47,7 +47,7 @@ declare global {
 const TRANSFER_EVENT_SIGNATURE = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a1c8df8eeb';
 const ROOTSTOCK_RPC = 'https://rpc.testnet.rootstock.io/am4fstO3ygCTb5mOi9CmIuUmQ2U7rk-T'; // Replace with your actual endpoint if needed
 
-// Import the SupplyChainToken ABI
+// Import the StockR00tToken ABI
 const SUPPLY_CHAIN_TOKEN_ABI = [
   "function name() view returns (string)",
   "function symbol() view returns (string)",
@@ -75,7 +75,7 @@ interface ProductJourney {
     score: number;
     passed: boolean;
   }[];
-  supplyChain: {
+  StockR00t: {
     stage: string;
     address: string;
     name: string;
@@ -121,7 +121,7 @@ interface Transaction {
   blockNumber: number;
 }
 
-interface SupplyChainStage {
+interface StockR00tStage {
   stage: string;
   address: string;
   name: string;
@@ -328,7 +328,7 @@ export default function ScanPage() {
       const validTransactions = transactions.filter((tx): tx is Transaction => tx !== null);
 
       // Create supply chain from transactions
-      const supplyChain: SupplyChainStage[] = validTransactions.map((tx, index) => {
+      const StockR00t: StockR00tStage[] = validTransactions.map((tx, index) => {
         let stage = "Unknown";
         if (tx.from === ethers.ZeroAddress) {
           stage = "Production";
@@ -376,7 +376,7 @@ export default function ScanPage() {
             passed: true
           }
         ],
-        supplyChain: supplyChain,
+        StockR00t: StockR00t,
         transactions: validTransactions
       };
 
@@ -695,10 +695,10 @@ export default function ScanPage() {
                   <h3 className="text-lg font-semibold mb-4">Supply Chain Journey</h3>
                   
                   <div className="space-y-4">
-                    {productJourney.supplyChain.map((stage, index) => (
+                    {productJourney.StockR00t.map((stage, index) => (
                       <div key={index} className="relative">
                         {/* Vertical line connecting stages */}
-                        {index < productJourney.supplyChain.length - 1 && (
+                        {index < productJourney.StockR00t.length - 1 && (
                           <div className="absolute left-6 top-12 bottom-0 w-0.5 bg-gray-200"></div>
                         )}
                         

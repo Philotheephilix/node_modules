@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./SupplyChainToken.sol";
+import "./StockR00tToken.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract TokenFactory is AccessControl {
@@ -106,7 +106,7 @@ contract TokenFactory is AccessControl {
         require(hasRole(FARMER_ROLE, msg.sender), "Must be registered as farmer");
         require(users[msg.sender].isVerified, "Farmer not verified");
 
-        SupplyChainToken token = new SupplyChainToken(
+        StockR00tToken token = new StockR00tToken(
             name, symbol, initialSupply, produceName, produceType,
             origin, harvestDate, msg.sender, isOrganic, sustainabilityScore
         );
@@ -142,7 +142,7 @@ contract TokenFactory is AccessControl {
         require(isTokenRegistered[tokenAddress], "Invalid token");
         require(amount > 0, "Amount must be greater than 0");
         
-        SupplyChainToken token = SupplyChainToken(tokenAddress);
+        StockR00tToken token = StockR00tToken(tokenAddress);
         require(token.balanceOf(msg.sender) >= amount, "Insufficient balance");
 
         // Validate transfer based on roles
@@ -177,7 +177,7 @@ contract TokenFactory is AccessControl {
         require(hasRole(RETAILER_ROLE, msg.sender), "Only retailers can burn tokens");
         require(isTokenRegistered[tokenAddress], "Invalid token");
         
-        SupplyChainToken token = SupplyChainToken(tokenAddress);
+        StockR00tToken token = StockR00tToken(tokenAddress);
         require(token.balanceOf(msg.sender) >= amount, "Insufficient balance");
 
         // Burn tokens
