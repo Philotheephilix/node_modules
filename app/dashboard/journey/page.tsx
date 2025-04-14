@@ -91,9 +91,9 @@ export default function JourneyPage() {
       },
       {
         stage: "Quality Check",
-        location: "Food Safety Lab, Delhi",
+        location: "Supply Safety Lab, Delhi",
         timestamp: "2025-03-17T09:45:00",
-        actor: "Food Safety Authority",
+        actor: "Supply Safety Authority",
         verified: true,
         details: {
           testResults: "Passed all tests",
@@ -152,8 +152,8 @@ export default function JourneyPage() {
     <DashboardLayout userRole="consumer">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">Food Journey Tracker</h1>
-          <p className="text-muted-foreground">Track where your food comes from and how it reached your plate</p>
+          <h1 className="text-3xl font-bold tracking-tight">Supply Journey Tracker</h1>
+          <p className="text-muted-foreground">Track where your Supply comes from and how it reached your plate</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ export default function JourneyPage() {
         <Tabs defaultValue="recent">
           <TabsList>
             <TabsTrigger value="recent">Recent Purchases</TabsTrigger>
-            <TabsTrigger value="journey">Food Journey</TabsTrigger>
+            <TabsTrigger value="journey">Supply Journey</TabsTrigger>
             <TabsTrigger value="scan">Scan QR</TabsTrigger>
           </TabsList>
 
@@ -325,7 +325,7 @@ export default function JourneyPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Transport Conditions</CardTitle>
-                    <CardDescription>How your food was transported</CardDescription>
+                    <CardDescription>How your Supply was transported</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -366,7 +366,7 @@ export default function JourneyPage() {
             <Card className="mx-auto max-w-md">
               <CardHeader>
                 <CardTitle>Scan QR Code</CardTitle>
-                <CardDescription>Scan a QR code on a food product to view its journey</CardDescription>
+                <CardDescription>Scan a QR code on a Supply product to view its journey</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center gap-4 py-10">
                 <div className="relative rounded-lg border-2 border-dashed p-12">
@@ -382,18 +382,18 @@ export default function JourneyPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Food Transparency</CardTitle>
-            <CardDescription>Benefits of blockchain-verified food tracking</CardDescription>
+            <CardTitle>Supply Transparency</CardTitle>
+            <CardDescription>Benefits of blockchain-verified Supply tracking</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 md:grid-cols-3">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Check className="h-5 w-5 text-green-500" />
-                  <h3 className="font-medium">Food Safety</h3>
+                  <h3 className="font-medium">Supply Safety</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Verify that your food has passed all safety checks and inspections.
+                  Verify that your Supply has passed all safety checks and inspections.
                 </p>
               </div>
 

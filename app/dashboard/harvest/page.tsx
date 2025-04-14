@@ -59,7 +59,7 @@ export default function HarvestPage() {
   const suppliers = [
     { id: "sup-1", name: "AgriDistributors Ltd.", rating: 4.8, distance: 12 },
     { id: "sup-2", name: "FreshChain Supplies", rating: 4.6, distance: 18 },
-    { id: "sup-3", name: "Organic Food Network", rating: 4.9, distance: 25 },
+    { id: "sup-3", name: "Organic Supply Network", rating: 4.9, distance: 25 },
     { id: "sup-4", name: "Rural Distributors Co.", rating: 4.5, distance: 8 },
   ]
 
@@ -320,7 +320,7 @@ export default function HarvestPage() {
                                 ? "AgriDistributors Ltd."
                                 : i === 2
                                   ? "FreshChain Supplies"
-                                  : "Organic Food Network"}
+                                  : "Organic Supply Network"}
                             </span>
                           </div>
                         </div>

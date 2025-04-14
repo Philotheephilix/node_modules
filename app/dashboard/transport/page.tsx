@@ -57,7 +57,7 @@ export default function TransportPage() {
       id: "ship-3",
       cropName: "Mixed Vegetables",
       quantity: 750,
-      supplier: "Organic Food Network",
+      supplier: "Organic Supply Network",
       departureDate: "2025-03-28T09:00:00",
       arrivalDate: "2025-03-28T16:45:00",
       status: "delivered",

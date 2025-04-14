@@ -9,7 +9,7 @@ const features = [
   {
     icon: Leaf,
     title: "Farm to Table Tracking",
-    description: "Track food from production to consumption with immutable blockchain records"
+    description: "Track Supply from production to consumption with immutable blockchain records"
   },
   {
     icon: ShieldCheck,
@@ -19,7 +19,7 @@ const features = [
   {
     icon: BarChart3,
     title: "Government Integration",
-    description: "Direct subsidies and monitoring for food security and regulatory compliance"
+    description: "Direct subsidies and monitoring for Supply security and regulatory compliance"
   },
   {
     icon: Truck,
@@ -34,7 +34,7 @@ const features = [
   {
     icon: Eye,
     title: "Consumer Transparency",
-    description: "Empower consumers with complete visibility into their food's journey and origin"
+    description: "Empower consumers with complete visibility into their Supply's journey and origin"
   }
 ]
 
@@ -57,7 +57,7 @@ const processSteps = [
   {
     step: 4,
     title: "Consumer Access",
-    description: "Consumers scan QR codes to view the complete journey of their food from farm to table"
+    description: "Consumers scan QR codes to view the complete journey of their Supply from farm to table"
   },
   {
     step: 5,
@@ -75,7 +75,7 @@ export default function WelcomePage() {
         <div className="container flex h-16 items-center justify-between py-4">
           <div className="flex items-center gap-2">
             <Leaf className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">FoodChain</span>
+            <span className="text-xl font-bold">SupplyChain</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">
@@ -103,13 +103,13 @@ export default function WelcomePage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4 animate-fade-in">
                 <div className="inline-block rounded-lg bg-accent px-3 py-1 text-sm text-accent-foreground mb-2">
-                  Transparent Food Supply Chain
+                  Transparent Supply Supply Chain
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
                   Farm to Table <span className="text-primary">Transparency</span>
                 </h1>
                 <p className="text-muted-foreground md:text-xl max-w-[600px]">
-                  Track your food's journey from production to consumption with blockchain-verified records. 
+                  Track your Supply's journey from production to consumption with blockchain-verified records. 
                   Ensuring quality, safety, and sustainability at every step.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
@@ -144,10 +144,10 @@ export default function WelcomePage() {
                 Features
               </div>
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                Why Choose FoodChain?
+                Why Choose SupplyChain?
               </h2>
               <p className="max-w-[700px] text-muted-foreground md:text-lg">
-                Our platform offers comprehensive tools for every stakeholder in the food supply chain
+                Our platform offers comprehensive tools for every stakeholder in the Supply supply chain
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -172,10 +172,10 @@ export default function WelcomePage() {
                 Process
               </div>
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                How FoodChain Works
+                How SupplyChain Works
               </h2>
               <p className="max-w-[700px] text-muted-foreground md:text-lg">
-                Our blockchain-powered platform connects all stakeholders in the food supply chain
+                Our blockchain-powered platform connects all stakeholders in the Supply supply chain
               </p>
             </div>
             <div className="relative">
@@ -203,10 +203,10 @@ export default function WelcomePage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                  Ready to Join the Future of Food Supply Chain?
+                  Ready to Join the Future of Supply Supply Chain?
                 </h2>
                 <p className="text-muted-foreground md:text-xl">
-                  Start tracking your products today and be part of a transparent, efficient, and sustainable food ecosystem.
+                  Start tracking your products today and be part of a transparent, efficient, and sustainable Supply ecosystem.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
                   <Button asChild size="lg" className="gap-2">
@@ -237,10 +237,10 @@ export default function WelcomePage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Leaf className="h-5 w-5 text-primary" />
-                <span className="text-lg font-bold">FoodChain</span>
+                <span className="text-lg font-bold">SupplyChain</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Transparent food supply chain tracking with blockchain technology
+                Transparent Supply supply chain tracking with blockchain technology
               </p>
             </div>
             <div className="space-y-4">
@@ -306,7 +306,7 @@ export default function WelcomePage() {
           </div>
           <div className="mt-8 border-t pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-xs text-muted-foreground">
-              &copy; {new Date().getFullYear()} FoodChain. All rights reserved.
+              &copy; {new Date().getFullYear()} SupplyChain. All rights reserved.
             </p>
           </div>
         </div>

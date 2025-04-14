@@ -74,7 +74,7 @@ export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayo
       ],
       consumer: [
         { name: "Scan & Buy", href: "/dashboard/scan", icon: ShoppingBag },
-        { name: "Food Journey", href: "/dashboard/journey", icon: Truck },
+        { name: "Supply Journey", href: "/dashboard/journey", icon: Truck },
         { name: "My Airdrops", href: "/dashboard/airdrops", icon: Wallet },
       ],
       government: [
@@ -118,7 +118,7 @@ export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayo
             <SheetContent side="left" className="w-[240px] sm:w-[300px]">
               <nav className="flex flex-col gap-4">
                 <div className="px-2 py-4">
-                  <h2 className="mb-2 text-lg font-semibold">FoodChain</h2>
+                  <h2 className="mb-2 text-lg font-semibold">SupplyChain</h2>
                   <p className="text-sm text-muted-foreground">{roleLabels[userRole]}</p>
                 </div>
                 <div className="px-2">
@@ -144,7 +144,7 @@ export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayo
 
           <div className="flex items-center gap-2">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-              FoodChain
+              SupplyChain
             </Link>
           </div>
 
@@ -200,7 +200,7 @@ export function DashboardLayout({ children, userRole = "farmer" }: DashboardLayo
           <div className="flex h-full flex-col gap-2">
             <div className="flex h-14 items-center border-b px-4">
               <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-                FoodChain
+                SupplyChain
               </Link>
             </div>
             <div className="flex-1 overflow-auto py-2">

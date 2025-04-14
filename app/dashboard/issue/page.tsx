@@ -52,7 +52,7 @@ export default function IssuePage() {
       id: "retailers-small",
       name: "Small Retailers",
       count: 890,
-      description: "Small-scale food retailers",
+      description: "Small-scale Supply retailers",
       criteria: "Annual turnover < ₹1,000,000, Employee count < 5",
     },
   ]
@@ -151,12 +151,12 @@ export default function IssuePage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="purpose">Purpose</Label>
-                  <Select defaultValue="food">
+                  <Select defaultValue="Supply">
                     <SelectTrigger>
                       <SelectValue placeholder="Select purpose" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="food">Food Subsidy</SelectItem>
+                      <SelectItem value="Supply">Supply Subsidy</SelectItem>
                       <SelectItem value="farming">Farming Support</SelectItem>
                       <SelectItem value="emergency">Emergency Relief</SelectItem>
                       <SelectItem value="sustainability">Sustainability Bonus</SelectItem>
@@ -172,12 +172,12 @@ export default function IssuePage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="restrictions">Usage Restrictions</Label>
-                  <Select defaultValue="food-only">
+                  <Select defaultValue="Supply-only">
                     <SelectTrigger>
                       <SelectValue placeholder="Select restrictions" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="food-only">Food Purchases Only</SelectItem>
+                      <SelectItem value="Supply-only">Supply Purchases Only</SelectItem>
                       <SelectItem value="farming-supplies">Farming Supplies Only</SelectItem>
                       <SelectItem value="no-restrictions">No Restrictions</SelectItem>
                     </SelectContent>
@@ -248,7 +248,7 @@ export default function IssuePage() {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
                       <p className="font-medium">
-                        {i === 1 ? "Food Subsidy" : i === 2 ? "Farming Support" : "Emergency Relief"}
+                        {i === 1 ? "Supply Subsidy" : i === 2 ? "Farming Support" : "Emergency Relief"}
                       </p>
                       <Badge variant="outline">{i === 1 ? "3,450" : i === 2 ? "1,245" : "2,780"} recipients</Badge>
                     </div>

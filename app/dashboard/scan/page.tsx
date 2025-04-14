@@ -55,7 +55,7 @@ export default function ScanPage() {
           },
           {
             stage: "Quality Check",
-            location: "Food Safety Lab, Delhi",
+            location: "Supply Safety Lab, Delhi",
             timestamp: "2025-03-17T09:45:00",
             verified: true,
           },
@@ -88,7 +88,7 @@ export default function ScanPage() {
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Scan & Buy</h1>
           <p className="text-muted-foreground">
-            Scan QR codes on food products to view their journey and make purchases
+            Scan QR codes on Supply products to view their journey and make purchases
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export default function ScanPage() {
           <Card className="mx-auto max-w-md">
             <CardHeader>
               <CardTitle>Scan QR Code</CardTitle>
-              <CardDescription>Point your camera at a food product QR code</CardDescription>
+              <CardDescription>Point your camera at a Supply product QR code</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center gap-4 py-10">
               <div className="relative rounded-lg border-2 border-dashed p-12">

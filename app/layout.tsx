@@ -8,8 +8,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "FoodChain - Blockchain Food Supply Chain",
-  description: "Track food from farm to table with blockchain technology",
+  title: "SupplyChain - Blockchain Supply Supply Chain",
+  description: "Track Supply from farm to table with blockchain technology",
 }
 
 export default function RootLayout({

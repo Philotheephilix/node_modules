@@ -84,7 +84,7 @@ export default function WastePage() {
   ]
 
   const ngos = [
-    { id: "ngo-1", name: "Food For All", distance: 5, accepts: "All food types" },
+    { id: "ngo-1", name: "Supply For All", distance: 5, accepts: "All Supply types" },
     { id: "ngo-2", name: "Hunger Relief", distance: 12, accepts: "Non-perishables" },
     { id: "ngo-3", name: "Community Kitchen", distance: 8, accepts: "Fresh produce" },
   ]
@@ -107,7 +107,7 @@ export default function WastePage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Waste Management</h1>
-          <p className="text-muted-foreground">Manage expiring items and food waste</p>
+          <p className="text-muted-foreground">Manage expiring items and Supply waste</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -214,8 +214,8 @@ export default function WastePage() {
               <div className="md:col-span-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Report Food Waste</CardTitle>
-                    <CardDescription>Report food items that need to be disposed of or redistributed</CardDescription>
+                    <CardTitle>Report Supply Waste</CardTitle>
+                    <CardDescription>Report Supply items that need to be disposed of or redistributed</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -303,7 +303,7 @@ export default function WastePage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Nearby NGOs</CardTitle>
-                    <CardDescription>Organizations that accept food donations</CardDescription>
+                    <CardDescription>Organizations that accept Supply donations</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">

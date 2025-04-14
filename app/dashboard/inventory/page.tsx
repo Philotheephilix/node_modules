@@ -57,7 +57,7 @@ export default function InventoryPage() {
       name: "Mixed Vegetables",
       type: "Vegetables",
       quantity: 180,
-      supplier: "Organic Food Network",
+      supplier: "Organic Supply Network",
       purchaseDate: "2025-03-28",
       expiryDate: "2025-04-28",
       stockLevel: 30,
