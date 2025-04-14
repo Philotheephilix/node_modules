@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs"
-import { Button } from "../components/ui/button"
-import { Progress } from "../components/ui/progress"
+import { useState, useEffect } from "react"
+import { ethers } from "ethers"
+import { DashboardLayout } from "../../components/dashboard-layout"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { Button } from "../../components/ui/button"
+import { Progress } from "../../components/ui/progress"
 import {
   BarChart,
   Calendar,
@@ -20,177 +21,142 @@ import {
   Trash2,
   CheckCircle2,
 } from "lucide-react"
+import TokenFactoryABI from "../../contracts/TokenFactory.json"
+import SupplyTokenABI from "../../contracts/SupplyToken.json"
+import React from "react"
 
-interface CardData {
-  title: string
-  icon: any
-  value: string
-  subtitle: string
-  progress?: number
+const TOKEN_FACTORY_ADDRESS = "0x8B27D610897208ad9A7b5A531bb90b5726ab8337"
+
+interface TokenTransaction {
+  title: string;
+  transactionId: string;
+  amount: string;
+  timestamp: number;
 }
 
-const roleCards: Record<string, CardData[]> = {
-  farmer: [
-    {
-      title: "Registered Crops",
-      icon: Leaf,
-      value: "12",
-      subtitle: "4 ready for harvest",
-      progress: 75
-    },
-    {
-      title: "Expected Yield",
-      icon: BarChart,
-      value: "2,450 kg",
-      subtitle: "+18% from last season"
-    },
-    {
-      title: "Active Shipments",
-      icon: Truck,
-      value: "3",
-      subtitle: "2 arriving today"
-    }
-  ],
-  supplier: [
-    {
-      title: "Inventory Status",
-      icon: Package,
-      value: "24,680 kg",
-      subtitle: "Across 8 warehouses"
-    },
-    {
-      title: "Pending Orders",
-      icon: Clock,
-      value: "18",
-      subtitle: "5 require immediate attention"
-    },
-    {
-      title: "Active Shipments",
-      icon: Truck,
-      value: "7",
-      subtitle: "3 arriving today"
-    }
-  ],
-  retailer: [
-    {
-      title: "Today's Sales",
-      icon: LineChart,
-      value: "₹45,680",
-      subtitle: "+12% from yesterday"
-    },
-    {
-      title: "Inventory Status",
-      icon: Package,
-      value: "1,245 items",
-      subtitle: "Low stock: 12 items"
-    },
-    {
-      title: "Active Orders",
-      icon: Clock,
-      value: "8",
-      subtitle: "3 pending delivery"
-    }
-  ],
-  consumer: [
-    {
-      title: "Recent Purchases",
-      icon: Package,
-      value: "12",
-      subtitle: "Last 30 days"
-    },
-    {
-      title: "Tracked Items",
-      icon: Eye,
-      value: "8",
-      subtitle: "Currently tracking"
-    },
-    {
-      title: "Saved Items",
-      icon: Calendar,
-      value: "24",
-      subtitle: "In your wishlist"
-    }
-  ],
-  government: [
-    {
-      title: "Active Subsidies",
-      icon: BarChart,
-      value: "₹2.4M",
-      subtitle: "Distributed this month"
-    },
-    {
-      title: "Registered Farmers",
-      icon: Users,
-      value: "1,245",
-      subtitle: "Active this month"
-    },
-    {
-      title: "Compliance Rate",
-      icon: CheckCircle2,
-      value: "98%",
-      subtitle: "Above target"
-    }
-  ],
-  waste: [
-    {
-      title: "Waste Collected",
-      icon: Trash2,
-      value: "2,450 kg",
-      subtitle: "This month"
-    },
-    {
-      title: "Recycling Rate",
-      icon: BarChart,
-      value: "85%",
-      subtitle: "Above target"
-    },
-    {
-      title: "Active Collections",
-      icon: Truck,
-      value: "12",
-      subtitle: "In progress"
-    }
-  ]
+interface DashboardData {
+  totalTokens: number;
+  totalSupply: string;
+  activeTransactions: number;
+  recentTransactions: TokenTransaction[];
+  tokens: {
+    name: string;
+    address: string;
+    created: Date;
+  }[];
 }
-
-const transactions = [
-  {
-    id: 1,
-    title: "Sold 500kg Rice to Supplier #1",
-    transactionId: "0x3a8d...1f9c",
-    amount: "+₹15,100"
-  },
-  {
-    id: 2,
-    title: "Sold 500kg Rice to Supplier #2",
-    transactionId: "0x3a8d...2f9c",
-    amount: "+₹15,200"
-  },
-  {
-    id: 3,
-    title: "Sold 500kg Rice to Supplier #3",
-    transactionId: "0x3a8d...3f9c",
-    amount: "+₹15,300"
-  }
-]
-
-const qrCodes = [
-  {
-    id: 1,
-    title: "Wheat Batch #1",
-    date: "Created on April 1, 2025"
-  },
-  {
-    id: 2,
-    title: "Wheat Batch #2",
-    date: "Created on April 2, 2025"
-  }
-]
 
 export default function DashboardPage() {
-  const [userRole, setUserRole] = useState<"farmer" | "supplier" | "retailer" | "consumer" | "government" | "waste">(
-    "farmer",
-  )
+  const [userRole, setUserRole] = useState<"farmer" | "supplier" | "retailer" | "consumer" | "government" | "waste">("farmer")
+  const [loading, setLoading] = useState(true)
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    totalTokens: 0,
+    totalSupply: "0",
+    activeTransactions: 0,
+    recentTransactions: [],
+    tokens: []
+  })
+
+  useEffect(() => {
+    const loadBlockchainData = async () => {
+      if (typeof window !== 'undefined' && window.ethereum) {
+        try {
+          const provider = new ethers.BrowserProvider(window.ethereum)
+          await provider.send("eth_requestAccounts", [])
+          const signer = await provider.getSigner()
+          
+          const factory = new ethers.Contract(
+            TOKEN_FACTORY_ADDRESS,
+            TokenFactoryABI.output.abi,
+            signer
+          )
+
+          // Get all tokens
+          const allTokens = await factory.getAllTokens()
+          let totalSupplyValue = ethers.parseUnits("0", 18)
+          const transactions: TokenTransaction[] = []
+          const tokenDetails = []
+
+          // Process each token
+          for (const tokenAddress of allTokens) {
+            const tokenContract = new ethers.Contract(
+              tokenAddress,
+              SupplyTokenABI.output.abi,
+              signer
+            )
+
+            const name = await tokenContract.name()
+            const supply = await tokenContract.totalSupply()
+            totalSupplyValue = totalSupplyValue + supply
+
+            // Get recent transfers
+            const transferFilter = tokenContract.filters.Transfer()
+            const events = await tokenContract.queryFilter(transferFilter)
+            
+            // Add token details
+            tokenDetails.push({
+              name: name,
+              address: tokenAddress,
+              created: new Date() // You might want to get this from the contract creation event
+            } as const)
+
+            // Process transfer events
+            for (const event of events.slice(-5)) {
+              const args = (event as ethers.EventLog).args
+              transactions.push({
+                title: `Transfer of ${name}`,
+                transactionId: event.transactionHash,
+                amount: ethers.formatUnits(args?.[2], 18),
+                timestamp: event.blockNumber
+              })
+            }
+          }
+
+          // Sort transactions by timestamp (most recent first)
+          transactions.sort((a, b) => b.timestamp - a.timestamp)
+
+          setDashboardData({
+            totalTokens: allTokens.length,
+            totalSupply: ethers.formatUnits(totalSupplyValue, 18),
+            activeTransactions: transactions.length,
+            recentTransactions: transactions.slice(0, 5),
+            tokens: tokenDetails
+          })
+
+        } catch (error) {
+          console.error("Error loading blockchain data:", error)
+        } finally {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadBlockchainData()
+  }, [])
+
+  const roleCards = {
+    farmer: [
+      {
+        title: "Registered Products",
+        icon: Leaf,
+        value: dashboardData.totalTokens.toString(),
+        subtitle: `Total supply: ${dashboardData.totalSupply} tokens`,
+        progress: 75
+      },
+      {
+        title: "Active Transactions",
+        icon: BarChart,
+        value: dashboardData.activeTransactions.toString(),
+        subtitle: "Recent transfers"
+      },
+      {
+        title: "Active Tokens",
+        icon: Package,
+        value: dashboardData.tokens.length.toString(),
+        subtitle: "Tracked on blockchain"
+      }
+    ]
+  }
 
   return (
     <DashboardLayout userRole={userRole}>
@@ -200,100 +166,105 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">Welcome to your SupplyChain dashboard</p>
         </div>
 
-        {/* Role selector for demo purposes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Demo Mode: Select User Role</CardTitle>
-            <CardDescription>Switch between different user interfaces to explore the application</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue={userRole} onValueChange={(value) => setUserRole(value as any)}>
-              <TabsList className="grid grid-cols-3 md:grid-cols-6">
-                <TabsTrigger value="farmer">Farmer</TabsTrigger>
-                <TabsTrigger value="supplier">Supplier</TabsTrigger>
-                <TabsTrigger value="retailer">Retailer</TabsTrigger>
-                <TabsTrigger value="consumer">Consumer</TabsTrigger>
-                <TabsTrigger value="government">Government</TabsTrigger>
-                <TabsTrigger value="waste">Waste Mgmt</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardContent>
-        </Card>
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <>
+            {/* Dashboard Content */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {roleCards.farmer.map((card) => (
+                <Card key={card.title} className="bg-card/50 backdrop-blur-sm">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                    <card.icon className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{card.value}</div>
+                    <p className="text-xs text-muted-foreground">{card.subtitle}</p>
+                    {card.progress !== undefined && (
+                      <div className="mt-4">
+                        <Progress value={card.progress} className="h-2" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
 
-        {/* Dashboard Content */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {roleCards[userRole].map((card) => (
-            <Card key={card.title} className="bg-card/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                <card.icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{card.value}</div>
-                <p className="text-xs text-muted-foreground">{card.subtitle}</p>
-                {card.progress !== undefined && (
-                  <div className="mt-4">
-                    <Progress value={card.progress} className="h-2" />
+              {/* Transactions Card */}
+              <Card className="md:col-span-2 bg-card/50 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Recent Transactions</CardTitle>
+                  <CardDescription>Your recent blockchain transactions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {dashboardData.recentTransactions.map((transaction, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <div className="rounded-full bg-primary/10 p-2">
+                          <Package className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium leading-none">{transaction.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Transaction ID: {transaction.transactionId.substring(0, 6)}...
+                            {transaction.transactionId.substring(transaction.transactionId.length - 4)}
+                          </p>
+                        </div>
+                        <div className="text-sm font-medium">{transaction.amount} tokens</div>
+                      </div>
+                    ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-
-          {/* Transactions Card */}
-          <Card className="md:col-span-2 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Your recent blockchain transactions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {transactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center gap-4">
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <Package className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">{transaction.title}</p>
-                      <p className="text-xs text-muted-foreground">Transaction ID: {transaction.transactionId}</p>
-                    </div>
-                    <div className="text-sm font-medium">{transaction.amount}</div>
-                  </div>
-                ))}
-              </div>
-              <Button variant="ghost" className="mt-4 w-full" size="sm">
-                View all transactions
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* QR Codes Card */}
-          <Card className="bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>QR Codes</CardTitle>
-              <CardDescription>Your active tracking codes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {qrCodes.map((code) => (
-                  <div key={code.id} className="flex items-center gap-4">
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <Eye className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">{code.title}</p>
-                      <p className="text-xs text-muted-foreground">{code.date}</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      View
+                  <a 
+                    href={`https://sepolia.etherscan.io/address/${TOKEN_FACTORY_ADDRESS}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="ghost" className="mt-4 w-full" size="sm">
+                      View all transactions
+                      <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
+                  </a>
+                </CardContent>
+              </Card>
+
+              {/* Tokens Card */}
+              <Card className="bg-card/50 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle>Registered Tokens</CardTitle>
+                  <CardDescription>Your active tokens on the blockchain</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {dashboardData.tokens.map((token, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <div className="rounded-full bg-primary/10 p-2">
+                          <Eye className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium leading-none">{token.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {token.address.substring(0, 6)}...{token.address.substring(token.address.length - 4)}
+                          </p>
+                        </div>
+                        <a 
+                          href={`https://sepolia.etherscan.io/address/${token.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="outline" size="sm">
+                            View
+                          </Button>
+                        </a>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
       </div>
     </DashboardLayout>
   )

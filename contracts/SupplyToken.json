@@ -585,7 +585,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/CropToken.sol": "CropToken"
+			"contracts/ProductToken.sol": "ProductToken"
 		},
 		"evmVersion": "cancun",
 		"libraries": {},
@@ -647,7 +647,7 @@
 				"dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF"
 			]
 		},
-		"contracts/CropToken.sol": {
+		"contracts/ProductToken.sol": {
 			"keccak256": "0x7103c63aff2fe63b9691327bf837e8e0f19c56fc4ef606503c111d46755dffcd",
 			"license": "MIT",
 			"urls": [

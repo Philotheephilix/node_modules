@@ -43,7 +43,7 @@ const processSteps = [
   {
     step: 1,
     title: "Farmer Registration",
-    description: "Farmers register their crops with detailed information about planting, cultivation methods, and harvesting"
+    description: "Farmers register their Products with detailed information about planting, cultivation methods, and harvesting"
   },
   {
     step: 2,

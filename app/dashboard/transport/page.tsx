@@ -1,249 +1,211 @@
 "use client"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
-import { Button } from "../components/ui/button"
-import { Badge } from "../components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
-import { Progress } from "../components/ui/progress"
-import { Separator } from "../components/ui/separator"
-import {
-  AlertCircle,
-  Calendar,
-  Check,
-  ChevronRight,
-  Clock,
-  ExternalLink,
-  MapPin,
-  Package,
-  QrCode,
-  ThermometerSnowflake,
-  Truck,
-} from "lucide-react"
 
-export default function TransportPage() {
-  const activeShipments = [
-    {
-      id: "ship-1",
-      cropName: "Premium Rice",
-      quantity: 1200,
-      supplier: "AgriDistributors Ltd.",
-      departureDate: "2025-04-01T08:30:00",
-      estimatedArrival: "2025-04-02T14:00:00",
-      currentLocation: "Highway NH-48, Kilometer 120",
-      status: "in-transit",
-      progress: 65,
-      temperature: 22,
-      humidity: 45,
-      qrCode: "SHIP-1234-ABCD",
-    },
-    {
-      id: "ship-2",
-      cropName: "Organic Wheat",
-      quantity: 800,
-      supplier: "FreshChain Supplies",
-      departureDate: "2025-04-01T10:15:00",
-      estimatedArrival: "2025-04-01T18:30:00",
-      currentLocation: "City Distribution Center",
-      status: "arrived",
-      progress: 100,
-      temperature: 21,
-      humidity: 40,
-      qrCode: "SHIP-5678-EFGH",
-    },
-  ]
+import { useState, useEffect } from "react"
+import { ethers } from "ethers"
+import { DashboardLayout } from "../../../components/dashboard-layout"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Badge } from "../../../components/ui/badge"
+import { QrCode } from "lucide-react"
+import React from "react"
+import TokenFactoryABI from "../../../contracts/TokenFactory.json"
+import SupplyTokenABI from "../../../contracts/SupplyToken.json"
 
-  const completedShipments = [
-    {
-      id: "ship-3",
-      cropName: "Mixed Vegetables",
-      quantity: 750,
-      supplier: "Organic Supply Network",
-      departureDate: "2025-03-28T09:00:00",
-      arrivalDate: "2025-03-28T16:45:00",
-      status: "delivered",
-      qrCode: "SHIP-9012-IJKL",
-    },
-    {
-      id: "ship-4",
-      cropName: "Premium Wheat",
-      quantity: 1800,
-      supplier: "Rural Distributors Co.",
-      departureDate: "2025-03-25T07:30:00",
-      arrivalDate: "2025-03-25T14:15:00",
-      status: "delivered",
-      qrCode: "SHIP-3456-MNOP",
-    },
-  ]
+const TOKEN_FACTORY_ADDRESS = "0x8B27D610897208ad9A7b5A531bb90b5726ab8337"
 
+interface TokenTransaction {
+  from: string;
+  to: string;
+  amount: string;
+  timestamp: number;
+  transactionHash: string;
+}
+
+interface CropToken {
+  id: string;
+  name: string;
+  symbol: string;
+  tokenAddress: string;
+  supply: string;
+  owner: string;
+  transactions: TokenTransaction[];
+  balance: string;
+}
+
+export default function CropsPage() {
+  const [cropTokens, setCropTokens] = useState<CropToken[]>([])
+  const [loading, setLoading] = useState(true)
+  const [account, setAccount] = useState("")
+  
+  // Connect to blockchain and load tokens
+  useEffect(() => {
+    const connectBlockchain = async () => {
+      if (typeof window !== 'undefined' && window.ethereum) {
+        try {
+          // Request account access
+          const provider = new ethers.BrowserProvider(window.ethereum)
+          await provider.send("eth_requestAccounts", [])
+          
+          // Get signer
+          const signer = await provider.getSigner()
+          const address = await signer.getAddress()
+          setAccount(address)
+
+          // Create contract instance
+          const factory = new ethers.Contract(
+            TOKEN_FACTORY_ADDRESS,
+            TokenFactoryABI.output.abi,
+            signer
+          )
+
+          // Load tokens
+          const allTokens = await factory.getAllTokens()
+          const tokens: CropToken[] = []
+
+          for (const tokenAddress of allTokens) {
+            const tokenContract = new ethers.Contract(
+              tokenAddress,
+              SupplyTokenABI.output.abi,
+              signer
+            )
+
+            // Get token details
+            const name = await tokenContract.name()
+            const symbol = await tokenContract.symbol()
+            const supply = ethers.formatUnits(await tokenContract.totalSupply(), 18)
+            const owner = await tokenContract.owner()
+            const balance = ethers.formatUnits(await tokenContract.balanceOf(address), 18)
+
+            // Get transfer events for transaction history
+            const transferFilter = tokenContract.filters.Transfer()
+            const events = await tokenContract.queryFilter(transferFilter)
+            
+            const transactions: TokenTransaction[] = events.map(event => ({
+              from: (event as ethers.EventLog).args?.[0],
+              to: (event as ethers.EventLog).args?.[1],
+              amount: ethers.formatUnits((event as ethers.EventLog).args?.[2], 18),
+              timestamp: event.blockNumber,
+              transactionHash: event.transactionHash
+            }))
+
+            tokens.push({
+              id: tokenAddress,
+              name,
+              symbol,
+              tokenAddress,
+              supply,
+              owner,
+              transactions,
+              balance
+            })
+          }
+          
+          setCropTokens(tokens)
+        } catch (error) {
+          console.error("Error loading tokens:", error)
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        console.log("Please install MetaMask")
+        setLoading(false)
+      }
+    }
+    
+    connectBlockchain()
+  }, [])
+  
   return (
     <DashboardLayout userRole="farmer">
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">Transport Status</h1>
-          <p className="text-muted-foreground">Track your produce through the supply chain</p>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">My Crops</h1>
+          <p className="text-muted-foreground">View your registered crops and their transaction history</p>
         </div>
 
-        <Tabs defaultValue="active">
-          <TabsList>
-            <TabsTrigger value="active">Active Shipments</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="active" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {activeShipments.map((shipment) => (
-                <Card key={shipment.id}>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle>{shipment.cropName}</CardTitle>
-                      <Badge variant={shipment.status === "in-transit" ? "default" : "secondary"}>
-                        {shipment.status === "in-transit" ? "In Transit" : "Arrived"}
-                      </Badge>
-                    </div>
-                    <CardDescription>
-                      {shipment.quantity} kg • To: {shipment.supplier}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>Departed: {new Date(shipment.departureDate).toLocaleString()}</span>
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        ) : cropTokens.length > 0 ? (
+          <div className="space-y-6">
+            {cropTokens.map((crop) => (
+              <Card key={crop.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-2xl">{crop.name}</CardTitle>
+                      <CardDescription className="mt-2">
+                        <div className="flex items-center gap-4">
+                          <Badge variant="outline">{crop.symbol}</Badge>
+                          <span>Supply: {crop.supply} tokens</span>
+                          <span>Balance: {crop.balance} tokens</span>
                         </div>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            {shipment.status === "in-transit"
-                              ? `ETA: ${new Date(shipment.estimatedArrival).toLocaleString()}`
-                              : `Arrived: ${new Date(shipment.estimatedArrival).toLocaleString()}`}
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-sm">Token Address:</span>
+                          <span className="text-sm font-mono">
+                            {crop.tokenAddress.substring(0, 6)}...{crop.tokenAddress.substring(crop.tokenAddress.length - 4)}
                           </span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-sm">
-                          <span>Progress</span>
-                          <span>{shipment.progress}%</span>
-                        </div>
-                        <Progress value={shipment.progress} className="h-2" />
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span>Current Location: {shipment.currentLocation}</span>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="rounded-lg border p-3">
-                          <div className="flex items-center gap-2 text-sm">
-                            <ThermometerSnowflake className="h-4 w-4 text-muted-foreground" />
-                            <span>Temperature</span>
-                          </div>
-                          <p className="mt-1 text-lg font-medium">{shipment.temperature}°C</p>
-                        </div>
-                        <div className="rounded-lg border p-3">
-                          <div className="flex items-center gap-2 text-sm">
-                            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                            <span>Humidity</span>
-                          </div>
-                          <p className="mt-1 text-lg font-medium">{shipment.humidity}%</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">QR Code</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">{shipment.qrCode}</span>
                           <QrCode className="h-4 w-4 text-muted-foreground" />
                         </div>
-                      </div>
+                      </CardDescription>
                     </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button className="w-full gap-2">
-                      <Truck className="h-4 w-4" /> Track Live
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="completed" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Completed Shipments</CardTitle>
-                <CardDescription>History of your delivered produce</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {completedShipments.map((shipment) => (
-                    <div key={shipment.id} className="flex items-center gap-4 rounded-lg border p-4">
-                      <div className="rounded-full bg-green-500/10 p-2">
-                        <Check className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">{shipment.cropName}</p>
-                          <Badge variant="outline">{shipment.quantity} kg</Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>Delivered: {new Date(shipment.arrivalDate).toLocaleString()}</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Transaction History</h3>
+                    <div className="space-y-3">
+                      {crop.transactions.length > 0 ? (
+                        crop.transactions.map((tx, index) => (
+                          <div key={`${crop.id}-${index}`} 
+                               className="flex items-center justify-between p-3 rounded-lg border bg-card">
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">From:</span>
+                                <span className="text-sm font-mono">
+                                  {tx.from.substring(0, 6)}...{tx.from.substring(tx.from.length - 4)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">To:</span>
+                                <span className="text-sm font-mono">
+                                  {tx.to.substring(0, 6)}...{tx.to.substring(tx.to.length - 4)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <span className="font-medium">{tx.amount} tokens</span>
+                              <a 
+                                href={`https://sepolia.etherscan.io/tx/${tx.transactionHash}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-500 hover:text-blue-600"
+                              >
+                                View on Etherscan
+                              </a>
+                            </div>
                           </div>
-                          <span>•</span>
-                          <div className="flex items-center gap-1">
-                            <Truck className="h-3 w-3" />
-                            <span>To: {shipment.supplier}</span>
-                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center text-muted-foreground py-4">
+                          No transactions found for this token
                         </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="gap-1">
-                        <Package className="h-4 w-4" /> Details
-                      </Button>
+                      )}
                     </div>
-                  ))}
-                </div>
-
-                <Button variant="ghost" className="mt-4 w-full" size="sm">
-                  View all shipments
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Blockchain Verification</CardTitle>
-            <CardDescription>All shipments are verified on the blockchain for transparency</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-lg border p-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="font-medium">Shipment Ledger</h3>
-                  <p className="text-sm text-muted-foreground">View the immutable record of all your shipments</p>
-                </div>
-                <Button variant="outline" className="gap-2 sm:mt-0">
-                  <ExternalLink className="h-4 w-4" /> View on Blockchain
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <h3 className="text-lg font-medium">No crop tokens found</h3>
+              <p className="text-sm text-muted-foreground mt-2">No tokens have been registered yet</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   )
 }
-

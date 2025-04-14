@@ -5,15 +5,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./SampleSupplyToken.sol";
 
 contract TokenFactory is Ownable {
-    event CropRegistered(address indexed farmer, address tokenAddress, string cropName, uint256 quantity);
+    event ProductRegistered(address indexed farmer, address tokenAddress, string ProductName, uint256 quantity);
     
     mapping(address => address[]) public farmerTokens;
     address[] public allTokens;
 
     constructor() Ownable(msg.sender) {}
 
-    function registerCrop(string memory name, string memory symbol, uint256 quantity) external {
-        CropToken token = new CropToken(
+    function registerProduct(string memory name, string memory symbol, uint256 quantity) external {
+        ProductToken token = new ProductToken(
             name,
             symbol,
             msg.sender,
@@ -24,7 +24,7 @@ contract TokenFactory is Ownable {
         farmerTokens[msg.sender].push(address(token));
         allTokens.push(address(token));
         
-        emit CropRegistered(msg.sender, address(token), name, quantity);
+        emit ProductRegistered(msg.sender, address(token), name, quantity);
     }
 
     function getAllTokens() external view returns (address[] memory) {
