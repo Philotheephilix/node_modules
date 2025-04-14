@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import { DashboardLayout } from "../../../components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Button } from "../../../components/ui/button"
-import { Input } from "../../../components/ui/input"
-import { Label } from "../../../components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select"
+import { DashboardLayout } from "../../../../components/dashboard-layout"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
+import { Label } from "../../../../components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
 import { Leaf, Plus } from "lucide-react"
 import React from "react"
-import TokenFactoryABI from "../../../contracts/TokenFactory.json"
-import SupplyTokenABI from "../../../contracts/SupplyToken.json"
+import TokenFactoryABI from "../../../../contracts/TokenFactory.json"
+import SupplyTokenABI from "../../../../contracts/SupplyToken.json"
 
 const TOKEN_FACTORY_ADDRESS = "0x8B27D610897208ad9A7b5A531bb90b5726ab8337"
 declare global {
@@ -147,7 +147,7 @@ export default function ProductsPage() {
   }
   
   return (
-    <DashboardLayout userRole="farmer">
+    <DashboardLayout userRole="producer">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div>

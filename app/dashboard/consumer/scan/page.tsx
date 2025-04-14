@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
-import { Button } from "../components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
-import { Badge } from "../components/ui/badge"
-import { Separator } from "../components/ui/separator"
+import { DashboardLayout } from "../../../../components/dashboard-layout"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Button } from "../../../../components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Badge } from "../../../../components/ui/badge"
+import { Separator } from "../../../../components/ui/separator"
 import { ArrowRight, Calendar, Check, Clock, Leaf, MapPin, QrCode, Truck, User, Wallet } from "lucide-react"
+import React from "react"
 
 export default function ScanPage() {
   const [scanResult, setScanResult] = useState<null | {

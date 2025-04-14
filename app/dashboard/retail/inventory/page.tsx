@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
-import { Button } from "../components/ui/button"
-import { Input } from "../components/ui/input"
-import { Badge } from "../components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
-import { Progress } from "../components/ui/progress"
+import { DashboardLayout } from "../../../../components/dashboard-layout"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
+import { Badge } from "../../../../components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Progress } from "../../../../components/ui/progress"
 import {
   AlertCircle,
   Calendar,
@@ -21,7 +21,8 @@ import {
   ShoppingBag,
   Truck,
 } from "lucide-react"
-import { useToast } from "../../hooks/use-toast"
+import { useToast } from "../../../../hooks/use-toast"
+import React from "react"
 
 export default function InventoryPage() {
   const { toast } = useToast()

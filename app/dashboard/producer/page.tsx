@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import { DashboardLayout } from "../../components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
-import { Button } from "../../components/ui/button"
-import { Progress } from "../../components/ui/progress"
+
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+import { DashboardLayout } from "../../../components/dashboard-layout"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Button } from "../../../components/ui/button"
+import { Progress } from "../../../components/ui/progress"
 import {
   BarChart,
   ChevronRight,
@@ -13,8 +19,8 @@ import {
   Leaf,
   Package,
 } from "lucide-react"
-import TokenFactoryABI from "../../contracts/TokenFactory.json"
-import SupplyTokenABI from "../../contracts/SupplyToken.json"
+import TokenFactoryABI from "../../../contracts/TokenFactory.json"
+import SupplyTokenABI from "../../../contracts/SupplyToken.json"
 import React from "react"
 
 const TOKEN_FACTORY_ADDRESS = "0x8B27D610897208ad9A7b5A531bb90b5726ab8337"
@@ -39,7 +45,6 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const [userRole, setUserRole] = useState<"producer" | "supplier" | "retailer" | "consumer" | "government" | "waste">("producer")
   const [loading, setLoading] = useState(true)
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     totalTokens: 0,
@@ -67,7 +72,7 @@ export default function DashboardPage() {
           const allTokens = await factory.getAllTokens()
           let totalSupplyValue = ethers.parseUnits("0", 18)
           const transactions: TokenTransaction[] = []
-          const tokenDetails = []
+          const tokenDetails: Array<{ name: string; address: string; created: Date }> = []
 
           // Process each token
           for (const tokenAddress of allTokens) {
@@ -151,7 +156,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <DashboardLayout userRole={userRole}>
+    <DashboardLayout userRole="supplier">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
