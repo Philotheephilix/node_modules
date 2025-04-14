@@ -94,7 +94,7 @@ export default function WelcomePage() {
           </nav>
           <div className="flex items-center border-4 border-primary rounded-full gap-4">
             <Button asChild variant="ghost" size="sm">
-              <Link href="/auth/login">Log in</Link>
+              <Link href="/self">Log in</Link>
             </Button>
           </div>
         </div>
