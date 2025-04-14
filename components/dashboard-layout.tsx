@@ -168,7 +168,7 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Mobile top navigation */}
-      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
+      <header className="sticky top-0  z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
         <div className="container flex h-14 items-center">
           <Sheet>
             <SheetTrigger asChild>
@@ -205,7 +205,7 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
           </Sheet>
 
           <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+            <Link href="/" className="flex items-center gap-2 font-semibold">
               StockR00t
             </Link>
           </div>
@@ -251,14 +251,6 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
           </div>
 
           <div className="flex items-center justify-end gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(!isSearchOpen)}>
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">

@@ -14,8 +14,8 @@ import { Label } from "../components/ui/label";
 const features = [
   {
     icon: Leaf,
-    title: "Farm to Table Tracking",
-    description: "Track Supply from production to consumption with immutable blockchain records"
+    title: "End-to-End Tracking",
+    description: "Track products from production to consumption with immutable blockchain records"
   },
   {
     icon: ShieldCheck,
@@ -25,7 +25,7 @@ const features = [
   {
     icon: BarChart3,
     title: "Government Integration",
-    description: "Direct subsidies and monitoring for Supply security and regulatory compliance"
+    description: "Direct subsidies and monitoring for supply security and regulatory compliance"
   },
   {
     icon: Truck,
@@ -40,20 +40,20 @@ const features = [
   {
     icon: Eye,
     title: "Consumer Transparency",
-    description: "Empower consumers with complete visibility into their Supply's journey and origin"
+    description: "Empower consumers with complete visibility into their product's journey and origin"
   }
 ]
 
 const processSteps = [
   {
     step: 1,
-    title: "Farmer Registration",
-    description: "Farmers register their Products with detailed information about planting, cultivation methods, and harvesting"
+    title: "Producer Registration",
+    description: "Producers register their products with detailed information about manufacturing, quality standards, and specifications"
   },
   {
     step: 2,
     title: "Supplier Distribution",
-    description: "Suppliers purchase from farmers and distribute to retailers with blockchain verification at each step"
+    description: "Suppliers purchase from producers and distribute to retailers with blockchain verification at each step"
   },
   {
     step: 3,
@@ -63,7 +63,7 @@ const processSteps = [
   {
     step: 4,
     title: "Consumer Access",
-    description: "Consumers scan QR codes to view the complete journey of their Supply from farm to table"
+    description: "Consumers scan QR codes to view the complete journey of their product from production to purchase"
   },
   {
     step: 5,
@@ -77,12 +77,12 @@ export default function WelcomePage() {
   const [devMode, setDevMode] = useState(true);
   const [showDevDialog, setShowDevDialog] = useState(false);
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-accent/20 to-background">
+    <div className="flex  flex-col bg-gradient-to-br from-background via-accent/20 to-background">
       <header className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-10">
         <div className="container flex h-16 items-center justify-between py-4">
           <div className="flex items-center gap-2">
-            <Leaf className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">SupplyChain</span>
+            <img src="/StockR00t.png" className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold">StockR00t</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">
@@ -92,12 +92,9 @@ export default function WelcomePage() {
               How It Works
             </Link>
           </nav>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center border-4 border-primary rounded-full gap-4">
             <Button asChild variant="ghost" size="sm">
               <Link href="/auth/login">Log in</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href="/auth/signup">Sign up</Link>
             </Button>
           </div>
         </div>
@@ -113,7 +110,7 @@ export default function WelcomePage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-blue-50 border-yellow-700 hover:bg-gradient-to-r hover:from-red-400 hover:to-red-100"
+                className="flex items-center gap-2 p-6 bg-gradient-to-r from-red-500 to-blue-50 border-yellow-700 hover:bg-gradient-to-r hover:from-red-400 hover:to-red-100"
                 onClick={() => setShowDevDialog(true)}
               >
                 <Terminal className="h-4 w-4 text-black-600" />
@@ -121,18 +118,18 @@ export default function WelcomePage() {
               </Button>
             </div>
                 <div className="inline-block rounded-lg bg-accent px-3 py-1 text-sm text-accent-foreground mb-2">
-                  Transparent Supply Supply Chain
+                  Transparent Supply Chain
                 </div>
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                  Farm to Table <span className="text-primary">Transparency</span>
+                  Production to Purchase <span className="text-primary">Transparency</span>
                 </h1>
                 <p className="text-muted-foreground md:text-xl max-w-[600px]">
-                  Track your Supply's journey from production to consumption with blockchain-verified records. 
+                  Track your product's journey from production to consumption with blockchain-verified records. 
                   Ensuring quality, safety, and sustainability at every step.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
                   <Button asChild size="lg" className="gap-2">
-                    <Link href="/auth/signup">
+                    <Link href="/auth/login">
                       Get Started <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
@@ -162,10 +159,10 @@ export default function WelcomePage() {
                 Features
               </div>
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                Why Choose SupplyChain?
+                Why Choose StockR00t?
               </h2>
               <p className="max-w-[700px] text-muted-foreground md:text-lg">
-                Our platform offers comprehensive tools for every stakeholder in the Supply supply chain
+                Our platform offers comprehensive tools for every stakeholder in the supply chain
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -190,10 +187,10 @@ export default function WelcomePage() {
                 Process
               </div>
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                How SupplyChain Works
+                How StockR00t Works
               </h2>
               <p className="max-w-[700px] text-muted-foreground md:text-lg">
-                Our blockchain-powered platform connects all stakeholders in the Supply supply chain
+                Our blockchain-powered platform connects all stakeholders in the supply chain
               </p>
             </div>
             <div className="relative">
@@ -221,10 +218,10 @@ export default function WelcomePage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                  Ready to Join the Future of Supply Supply Chain?
+                  Ready to Join the Future of Supply Chain?
                 </h2>
                 <p className="text-muted-foreground md:text-xl">
-                  Start tracking your products today and be part of a transparent, efficient, and sustainable Supply ecosystem.
+                  Start tracking your products today and be part of a transparent, efficient, and sustainable supply ecosystem.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
                   <Button asChild size="lg" className="gap-2">
@@ -250,83 +247,10 @@ export default function WelcomePage() {
       </main>
 
       <footer className="border-t py-8 bg-background">
-        <div className="container px-4 md:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-primary" />
-                <span className="text-lg font-bold">SupplyChain</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Transparent Supply supply chain tracking with blockchain technology
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Platform</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="#features" className="text-muted-foreground hover:text-primary transition-colors">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#how-it-works" className="text-muted-foreground hover:text-primary transition-colors">
-                    How It Works
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Pricing
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Careers
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Terms
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    Cookies
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 border-t pt-8 flex flex-col md:flex-row justify-between items-center">
+        <div className="container flex justify-center px-4 md:px-6">
             <p className="text-xs text-muted-foreground">
-              &copy; {new Date().getFullYear()} SupplyChain. All rights reserved.
+              &copy; {new Date().getFullYear()} StockR00t. All rights reserved.
             </p>
-          </div>
         </div>
       </footer>
 
