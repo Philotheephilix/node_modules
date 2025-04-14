@@ -68,10 +68,7 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
         { name: "Sales", href: "/dashboard/retail/sales", icon: ShoppingBag },
       ],
       consumer: [
-      { name: "Dashboard", href: "/dashboard/consumer", icon: Home },
-        { name: "Scan & Buy", href: "/dashboard/consumer/scan", icon: ShoppingBag },
-        { name: "Supply Journey", href: "/dashboard/consumer/journey", icon: Truck },
-        { name: "My Airdrops", href: "/dashboard/consumer/airdrops", icon: Wallet },
+        { name: "Verify Authenticity", href: "/dashboard/consumer/scan", icon: ShoppingBag },
       ],
       government: [
       { name: "Dashboard", href: "/dashboard/government", icon: Home },
