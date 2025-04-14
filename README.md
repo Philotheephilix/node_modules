@@ -1,24 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# StockRoot - Supply Chain Management Platform
+
+StockRoot is a blockchain-based supply chain management platform that enables end-to-end tracking of products from production to purchase. The platform uses smart contracts to tokenize real-world assets and provide transparency throughout the supply chain.
+
+## Contract Addresses
+
+### Main Contracts (Rootstock Testnet)
+- **TokenFactory**: `0xf88C501cBA1DB713c080F886c74DB87ffd616FB2`
+- **SampleTokenFactory**: `0xA94B41B5038196ED019453FCC82Ea8fD0764767c`
+
+## Features
+
+- **End-to-End Tracking**: Track products from production to purchase
+- **Role-Based Access**: Different dashboards for producers, suppliers, retailers, consumers, and government
+- **Tokenized Assets**: Products are represented as ERC-20 tokens
+- **Identity Verification**: Self Protocol integration for secure identity verification
+- **Blockchain Integration**: Built on Rootstock Testnet with Alchemy API integration
+
+## Tech Stack
+
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+- **Smart Contracts**: Solidity, Hardhat
+- **Blockchain**: Rootstock Testnet
+- **Identity**: Self Protocol
+- **API**: Alchemy
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (v18 or higher)
+- MetaMask or another Web3 wallet
+- Rootstock Testnet configured in your wallet
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/stockroot.git
+   cd stockroot
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   ```
+
+3. Create a `.env` file based on `.env.example`:
+   ```
+   PRIVATE_KEY=your_private_key
+   INFURA_API_KEY=your_infura_api_key
+   ETHERSCAN_API_KEY=your_etherscan_api_key
+   NEXT_PUBLIC_RPC_URL=https://rpc.testnet.rootstock.io/your_api_key
+   NEXT_PUBLIC_TOKEN_FACTORY_ADDRESS=0xf88C501cBA1DB713c080F886c74DB87ffd616FB2
+   ```
+
+4. Compile smart contracts:
+   ```bash
+   npm run compile
+   # or
+   yarn compile
+   # or
+   pnpm compile
+   ```
+
+5. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   ```
+
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Project Structure
+
+- `/app`: Next.js application code
+  - `/dashboard`: Role-based dashboards
+    - `/consumer`: Consumer dashboard
+    - `/producer`: Producer dashboard
+    - `/retail`: Retailer dashboard
+    - `/supplier`: Supplier dashboard
+    - `/government`: Government dashboard
+  - `/api`: API routes
+  - `/self`: Self Protocol integration
+- `/contracts`: Smart contracts
+  - `TokenFactory.sol`: Main token factory contract
+  - `SupplyChainToken.sol`: Token contract for supply chain assets
+  - `SampleTokenFactory.sol`: Simplified token factory for testing
+  - `SampleSupplyToken.sol`: Simplified token contract for testing
+- `/components`: Reusable UI components
+- `/public`: Static assets
+
+## Smart Contracts
+
+### TokenFactory
+
+The main contract that manages the creation and tracking of supply chain tokens. It includes role-based access control and inventory tracking.
+
+### SupplyChainToken
+
+An ERC-20 token that represents a product in the supply chain. It includes metadata about the product and transfer restrictions based on roles.
+
+### SampleTokenFactory
+
+A simplified version of the TokenFactory contract for testing and development.
+
+### SampleSupplyToken
+
+A simplified version of the SupplyChainToken contract for testing and development.
+
+## Deployment
+
+To deploy the contracts to the Rootstock Testnet:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx hardhat run scripts/deploy.js --network rootstock
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## License
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Acknowledgements
+
+- [OpenZeppelin](https://openzeppelin.com/) for smart contract libraries
+- [Self Protocol](https://self.id/) for identity verification
+- [Alchemy](https://www.alchemy.com/) for blockchain API
+- [Rootstock](https://www.rsk.co/) for the blockchain network
 
 ## Learn More
 
