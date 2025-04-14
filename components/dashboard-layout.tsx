@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -49,38 +49,42 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
   // Role-specific navigation items
   const getRoleNavItems = (role: UserRole) => {
     const commonItems = [
-      { name: "Dashboard", href: "/dashboard", icon: Home },
     ]
 
     const roleSpecificItems: Record<UserRole, Array<{ name: string; href: string; icon: any }>> = {
       producer: [
+      { name: "Dashboard", href: "/dashboard/producer", icon: Home },
         { name: "My Crops", href: "/dashboard/producer/Products", icon: Leaf },
         { name: "Transport Status", href: "/dashboard/producer/transport", icon: Truck },
       ],
       supplier: [
-        { name: "Buy from Farmers", href: "/dashboard/buy", icon: ShoppingBag },
-        { name: "Warehouse", href: "/dashboard/warehouse", icon: FileText },
-        { name: "Distribution", href: "/dashboard/distribute", icon: Truck },
+      { name: "Dashboard", href: "/dashboard/supplier", icon: Home },
+        { name: "Warehouse", href: "/dashboard/supplier/warehouse", icon: FileText },
+        { name: "Distribution", href: "/dashboard/supplier/distribute", icon: Truck },
       ],
       retailer: [
-        { name: "Inventory", href: "/dashboard/inventory", icon: FileText },
-        { name: "Sales", href: "/dashboard/sales", icon: ShoppingBag },
-        { name: "Waste Management", href: "/dashboard/waste", icon: Trash2 },
+      { name: "Dashboard", href: "/dashboard/retailer", icon: Home },
+        { name: "Inventory", href: "/dashboard/retailer/inventory", icon: FileText },
+        { name: "Sales", href: "/dashboard/retailer/sales", icon: ShoppingBag },
+        { name: "Waste Management", href: "/dashboard/retailer/waste", icon: Trash2 },
       ],
       consumer: [
-        { name: "Scan & Buy", href: "/dashboard/scan", icon: ShoppingBag },
-        { name: "Supply Journey", href: "/dashboard/journey", icon: Truck },
-        { name: "My Airdrops", href: "/dashboard/airdrops", icon: Wallet },
+      { name: "Dashboard", href: "/dashboard/consumer", icon: Home },
+        { name: "Scan & Buy", href: "/dashboard/consumer/scan", icon: ShoppingBag },
+        { name: "Supply Journey", href: "/dashboard/consumer/journey", icon: Truck },
+        { name: "My Airdrops", href: "/dashboard/consumer/airdrops", icon: Wallet },
       ],
       government: [
-        { name: "Monitor Chain", href: "/dashboard/monitor", icon: BarChart3 },
-        { name: "Issue Airdrops", href: "/dashboard/issue", icon: Wallet },
-        { name: "Fraud Detection", href: "/dashboard/fraud", icon: FileText },
+      { name: "Dashboard", href: "/dashboard/government", icon: Home },
+        { name: "Monitor Chain", href: "/dashboard/government/monitor", icon: BarChart3 },
+        { name: "Issue Airdrops", href: "/dashboard/government/issue", icon: Wallet },
+        { name: "Fraud Detection", href: "/dashboard/government/fraud", icon: FileText },
       ],
       waste: [
-        { name: "Waste Reports", href: "/dashboard/reports", icon: FileText },
-        { name: "Redistribution", href: "/dashboard/redistribute", icon: Truck },
-        { name: "Disposal", href: "/dashboard/disposal", icon: Trash2 },
+      { name: "Dashboard", href: "/dashboard/waste", icon: Home },
+        { name: "Waste Reports", href: "/dashboard/waste/reports", icon: FileText },
+        { name: "Redistribution", href: "/dashboard/waste/redistribute", icon: Truck },
+        { name: "Disposal", href: "/dashboard/waste/disposal", icon: Trash2 },
       ],
     }
 
@@ -193,11 +197,6 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
       <div className="flex-1 items-start md:grid md:grid-cols-[240px_1fr] lg:grid-cols-[280px_1fr]">
         <aside className="fixed top-0 z-30 hidden h-screen w-full shrink-0 border-r md:sticky md:block">
           <div className="flex h-full flex-col gap-2">
-            <div className="flex h-14 items-center border-b px-4">
-              <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-                SupplyChain
-              </Link>
-            </div>
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid items-start px-2 text-sm font-medium">
                 {navItems.map((item, index) => (
@@ -253,49 +252,6 @@ export function DashboardLayout({ children, userRole = "producer" }: DashboardLa
         </aside>
 
         <main className="flex flex-col">
-          <header className="sticky top-0 z-20 hidden h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:flex lg:h-[60px]">
-            <div className="w-full flex-1">
-              <form>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search..."
-                    className="w-full bg-background pl-8 md:w-2/3 lg:w-1/3"
-                  />
-                </div>
-              </form>
-            </div>
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt="User" />
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/settings">Settings</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/auth/logout">Log out</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </header>
-
           <div className="flex-1 p-4 md:p-6">{children}</div>
         </main>
       </div>

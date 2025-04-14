@@ -50,7 +50,7 @@
 					{
 						"indexed": false,
 						"internalType": "string",
-						"name": "ProductName",
+						"name": "cropName",
 						"type": "string"
 					},
 					{
@@ -60,7 +60,7 @@
 						"type": "uint256"
 					}
 				],
-				"name": "ProductRegistered",
+				"name": "CropRegistered",
 				"type": "event"
 			},
 			{
@@ -169,7 +169,7 @@
 						"type": "uint256"
 					}
 				],
-				"name": "registerProduct",
+				"name": "registerCrop",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -292,7 +292,7 @@
 				"dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF"
 			]
 		},
-		"contracts/ProductToken.sol": {
+		"contracts/CropToken.sol": {
 			"keccak256": "0x7103c63aff2fe63b9691327bf837e8e0f19c56fc4ef606503c111d46755dffcd",
 			"license": "MIT",
 			"urls": [
